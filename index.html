@@ -1,0 +1,1233 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f1a">
+<meta name="author" content="MNRY · mantarraya.pe">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Consigue likes. Esquiva ministros. Sobrevive al gobierno. Videojuego de sátira política en 8 bits.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="KEIKO TAP TAP — ¡No me interrumpan, estoy en LIVE!">
+<meta property="og:description" content="Consigue likes. Esquiva ministros. Sobrevive al gobierno. Videojuego de sátira política en 8 bits.">
+<meta property="og:image" content="og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<title>Keiko Tap Tap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap">
+<style>
+@font-face{font-family:"Press Start 2P";src:url(assets/fonts/press-start-2p.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Pixelify Sans";src:url(assets/fonts/pixelify-sans-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Pixelify Sans";src:url(assets/fonts/pixelify-sans-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Pixelify Sans";src:url(assets/fonts/pixelify-sans-700.woff2) format("woff2");font-weight:700;font-display:swap}
+[hidden]{display:none!important}
+/* Layout: una sola pantalla vertical 360x640 escalada al viewport; el resto es marco oscuro */
+:root{
+  --bg:#0b0f1a; --panel:#1b2134; --line:#3a4466; --fg:#f4f1ff; --muted:#9aa3c7;
+  --pink:#ff3d7f; --green:#22c55e; --blue:#3b5bdb; --gold:#ffc83d; --red:#e8283f;
+  --f-display:"Press Start 2P",ui-monospace,monospace;
+  --f-ui:"Pixelify Sans",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);overflow:hidden;overscroll-behavior:none}
+body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:var(--f-ui)}
+#wrap{position:fixed;inset:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
+  background:radial-gradient(ellipse at 50% 30%,#1a2140 0%,#0b0f1a 70%)}
+#c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;outline:none;box-shadow:0 0 0 2px #232a45,0 20px 60px #000a}
+#credit{position:fixed;z-index:5;display:block}
+#share{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#05070dcc;padding:16px;box-sizing:border-box}
+#share .card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:14px;max-width:340px;width:100%;display:flex;flex-direction:column;gap:10px;align-items:stretch}
+#share h2{font-family:var(--f-display);font-size:12px;margin:0;color:var(--gold);text-align:center;letter-spacing:.04em}
+#share img{width:100%;height:auto;max-height:52vh;object-fit:contain;border-radius:6px;image-rendering:pixelated;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+#share .row{display:flex;gap:8px;flex-wrap:wrap}
+#share button,#share a{flex:1 1 40%;font-family:var(--f-ui);font-weight:700;font-size:15px;border:0;border-radius:6px;padding:11px 8px;color:#fff;text-align:center;text-decoration:none;cursor:pointer;border-bottom:4px solid #0006}
+#share .wa{background:#25a35a}#share .nat{background:var(--pink)}#share .cp{background:var(--blue)}#share .cl{background:#3a4466}
+#share button:focus-visible,#share a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#share p{margin:0;font-size:13px;color:var(--muted);text-align:center}
+#share textarea{width:100%;box-sizing:border-box;font-family:var(--f-ui);font-size:13px;background:#0b0f1a;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px;resize:none}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c" width="360" height="640" tabindex="0" aria-label="Keiko Tap Tap, videojuego"></canvas></div>
+<a id="credit" href="https://mantarraya.pe" target="_blank" rel="noopener" aria-label="mantarraya.pe" hidden></a>
+<div id="share" hidden>
+  <div class="card" role="dialog" aria-label="Compartir resultado">
+    <h2>COMPARTIR RESULTADO</h2>
+    <img id="shImg" alt="Tarjeta con tu resultado en Keiko Tap Tap">
+    <p>Mantén presionada la imagen para guardarla.</p>
+    <div class="row">
+      <button id="shNat" class="nat" type="button">Compartir</button>
+      <a id="shWa" class="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+    <textarea id="shTxt" rows="3" readonly></textarea>
+    <div class="row">
+      <button id="shCp" class="cp" type="button">Copiar texto</button>
+      <button id="shCl" class="cl" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="cfg">
+{
+  "shareUrl": "",
+  "comboTimeout": 1.2,
+  "multipliers": [[0,1],[10,2],[25,3],[50,4],[100,5]],
+  "comboBonus": {"10":5,"25":10,"50":20,"100":40},
+  "likesPerViewer": 10,
+  "viewers0": 100,
+  "pending0": 10,
+  "inactivityDelay": 5,
+  "inactivityLoss": 2,
+  "inactivityLossPct": [0.03, 0.03, 0.05, 0.06],
+  "audienceFailMin": 15,
+  "firstEvent": 5,
+  "inputLock": 0.35,
+  "escalation": {"start": 75, "pendingAccel": 0.03, "intervalShrink": 0.012, "minIntervalScale": 0.5},
+  "phases": [
+    {"name":"EL LIVE TRANQUILO","start":0,"interval":[10,12],"max":1,"autoPending":0.2,
+     "events":["minister","protest","internet","journalist"]},
+    {"name":"LA AGENDA PRESIDENCIAL","start":20,"interval":[7,9],"max":1,"autoPending":0.2,
+     "events":["minister","protest","journalist","congress","documents","internet"]},
+    {"name":"CRISIS DE GOBIERNO","start":45,"interval":[5,7],"max":2,"autoPending":0.25,
+     "events":["minister","protest","journalist","congress","documents","internet","emergency","advisor"]},
+    {"name":"CAOS TOTAL","start":75,"interval":[3,5],"max":3,"autoPending":0.5,
+     "events":["minister","protest","journalist","congress","documents","internet","emergency","advisor","emergency","documents","congress"]}
+  ],
+  "events": {
+    "minister":   {"limit":4, "failPending":8, "failBlock":3},
+    "congress":   {"limit":5, "answerBlock":4, "answerPending":-12, "rejectPending":10},
+    "protest":    {"limit":5, "taps":3, "failAudiencePct":0.15, "failPending":12},
+    "journalist": {"limit":5, "hold":1.5, "failBlock":4, "failPending":6},
+    "documents":  {"limit":10, "count":3, "countLate":4, "laterPending":5, "signTime":2, "signPending":-8},
+    "emergency":  {"limit":6, "attendBlock":6, "attendPending":-20, "ignorePending":25},
+    "internet":   {"limit":5, "taps":10, "failAudiencePct":0.2},
+    "advisor":    {"limit":6, "resolveBlock":5, "resolvePending":-15, "delegatePending":12}
+  }
+}
+</script>
+
+<script>
+'use strict';
+/* =========================================================================
+   KEIKO TAP TAP — ¡No me interrumpan, estoy en LIVE!
+   Sátira política. Obra ficticia. Arte de personajes: MNRY.
+   ========================================================================= */
+const CFG = JSON.parse(document.getElementById('cfg').textContent);
+const W = 360, H = 640, ST = 96, SB = 448;           // pantalla lógica y límites del escenario
+const F1 = '"Press Start 2P", ui-monospace, monospace';
+const F2 = '"Pixelify Sans", system-ui, sans-serif';
+const COL = {
+  ink:'#0b0f1a', panel:'#1b2134', panel2:'#252c45', line:'#3a4466', fg:'#f4f1ff', muted:'#9aa3c7',
+  pink:'#ff3d7f', pink2:'#b81f55', red:'#e8283f', red2:'#8e1426', green:'#22c55e', green2:'#15803d',
+  blue:'#3b5bdb', blue2:'#253c99', gold:'#ffc83d', gold2:'#b8860b', orange:'#fb923c', yellow:'#facc15',
+  white:'#ffffff', sky:'#5aa9e6', cyan:'#38bdf8'
+};
+const cv = document.getElementById('c');
+let ctx = cv.getContext('2d');
+let K = 1;
+
+/* ---------- utilidades ---------- */
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[(Math.random() * a.length) | 0];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const inR = (x, y, r) => x >= r[0] && x <= r[0] + r[2] && y >= r[1] && y <= r[1] + r[3];
+const ease = t => 1 - Math.pow(1 - clamp(t, 0, 1), 3);
+function fmt(n) {
+  n = Math.floor(n);
+  if (n < 1000) return String(n);
+  if (n < 1e6) return (n / 1000).toFixed(n < 1e4 ? 1 : 0).replace(/\.0$/, '') + 'K';
+  return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+}
+const full = n => Math.floor(n).toLocaleString('es-PE');
+const mmss = s => { s = Math.floor(s); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('ktt_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('ktt_' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+/* ---------- dibujo ---------- */
+function R(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+function rr(x, y, w, h, r, fill, stroke, lw = 2) {
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+function T(s, x, y, o = {}) {
+  const size = o.size || 12, font = o.font || F2;
+  ctx.font = (o.weight || (font === F2 ? 700 : 400)) + ' ' + size + 'px ' + font;
+  ctx.textAlign = o.align || 'left';
+  ctx.textBaseline = o.base || 'top';
+  if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+  if (o.outline) { ctx.lineJoin = 'round'; ctx.strokeStyle = o.outline; ctx.lineWidth = o.ow || Math.max(3, size / 3); ctx.strokeText(s, x, y); }
+  if (o.shadow) { ctx.fillStyle = o.shadow; ctx.fillText(s, x + (o.sd || 2), y + (o.sd || 2)); }
+  ctx.fillStyle = o.color || COL.fg;
+  ctx.fillText(s, x, y);
+  ctx.globalAlpha = 1;
+}
+function tw(s, size, font = F2, weight) { ctx.font = (weight || (font === F2 ? 700 : 400)) + ' ' + size + 'px ' + font; return ctx.measureText(s).width; }
+function wrap(s, maxW, size, font = F2) {
+  const words = s.split(' '), lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (tw(t, size, font) > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+const HEART = ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'];
+const heartCache = {};
+function heartSprite(c, p) {
+  const key = c + p; if (heartCache[key]) return heartCache[key];
+  const cnv = document.createElement('canvas'); cnv.width = 7 * p; cnv.height = 6 * p;
+  const g = cnv.getContext('2d');
+  HEART.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === 'X') { g.fillStyle = c; g.fillRect(i * p, j * p, p, p); } }));
+  g.fillStyle = 'rgba(255,255,255,.75)'; g.fillRect(p, p, p, p);
+  return (heartCache[key] = cnv);
+}
+function heart(x, y, p, c, a = 1) { ctx.globalAlpha = a; ctx.drawImage(heartSprite(c, p), Math.round(x - 3.5 * p), Math.round(y - 3 * p)); ctx.globalAlpha = 1; }
+function eye(x, y, c = COL.fg) { // ícono de ojo pixelado 12x8
+  R(x + 3, y, 6, 1, c); R(x + 1, y + 1, 10, 1, c); R(x, y + 2, 12, 4, c); R(x + 1, y + 6, 10, 1, c); R(x + 3, y + 7, 6, 1, c);
+  R(x + 4, y + 2, 4, 4, COL.ink); R(x + 5, y + 3, 1, 1, c);
+}
+function person(x, y, c) { R(x + 4, y, 6, 6, c); R(x + 1, y + 7, 12, 6, c); }
+function wifi(cx, cy, s, c, lvl = 3) { // ícono wifi con arcos
+  ctx.strokeStyle = c; ctx.lineCap = 'butt'; ctx.lineWidth = s * 0.16;
+  for (let i = 1; i <= 3; i++) { if (i > lvl) ctx.globalAlpha = .25; ctx.beginPath(); ctx.arc(cx, cy, s * 0.22 * i + s * .05, Math.PI * 1.22, Math.PI * 1.78); ctx.stroke(); ctx.globalAlpha = 1; }
+  R(cx - s * .08, cy - s * .08, s * .16, s * .16, c);
+}
+
+/* ---------- recursos (arte de MNRY recortado de la hoja de sprites) ---------- */
+const IMG = {};
+const ASSETS = ['idle1','idle2','idle3','tap1','tap2','tap3','happy1','happy2','happy3a','happy3','excited1','excited2',
+  'angry1','angry2','sad1','sad2','phone1','hat1','hat2','president1','panic1','gameover1',
+  'ministro','congreso','periodista','manifestantes','asesor','policia','docs_pila','docs_caja','docs_urgente',
+  'bg_despacho','bg_palacio','bg_protesta','bg_emergencia'];
+let loaded = 0;
+function loadAssets() {
+  return Promise.all(ASSETS.map(n => new Promise(res => {
+    const im = new Image(); im.onload = () => { IMG[n] = im; loaded++; res(); }; im.onerror = () => { loaded++; res(); };
+    im.src = 'assets/' + n + '.png';
+  })));
+}
+function spr(name, x, y, s, o = {}) { // dibuja anclado abajo-centro
+  const im = IMG[name]; if (!im) return null;
+  const w = im.width * s * (o.sx || 1), h = im.height * s * (o.sy || 1);
+  ctx.save();
+  if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+  if (o.rot) { ctx.translate(x, y - h / 2); ctx.rotate(o.rot); ctx.drawImage(im, -w / 2, -h / 2, w, h); }
+  else if (o.flip) { ctx.translate(Math.round(x + w / 2), 0); ctx.scale(-1, 1); ctx.drawImage(im, 0, Math.round(y - h), w, h); }
+  else ctx.drawImage(im, Math.round(x - w / 2), Math.round(y - h), Math.round(w), Math.round(h));
+  ctx.restore();
+  return [x - w / 2, y - h, w, h];
+}
+
+/* ---------- audio: síntesis chiptune con Web Audio ---------- */
+const A = { ctx: null, on: store.get('sound', true), master: null, sfx: null, mus: null, noise: null, lastTap: 0 };
+function unlockAudio() {
+  if (!A.ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    A.ctx = new AC();
+    A.master = A.ctx.createGain(); A.master.gain.value = A.on ? 1 : 0; A.master.connect(A.ctx.destination);
+    A.sfx = A.ctx.createGain(); A.sfx.gain.value = .55; A.sfx.connect(A.master);
+    A.mus = A.ctx.createGain(); A.mus.gain.value = .22; A.mus.connect(A.master);
+    const len = A.ctx.sampleRate * 1.5, buf = A.ctx.createBuffer(1, len, A.ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    A.noise = buf;
+  }
+  if (A.ctx.state === 'suspended') A.ctx.resume();
+}
+function setSound(on) { A.on = on; store.set('sound', on); if (A.master) A.master.gain.setTargetAtTime(on ? 1 : 0, A.ctx.currentTime, .02); }
+function tone(f, dur, o = {}) {
+  if (!A.ctx || !A.on) return;
+  const t = A.ctx.currentTime + (o.at || 0), osc = A.ctx.createOscillator(), g = A.ctx.createGain();
+  osc.type = o.type || 'square'; osc.frequency.setValueAtTime(f, t);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + dur);
+  const v = o.vol || .15; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  osc.connect(g); g.connect(o.bus || A.sfx); osc.start(t); osc.stop(t + dur + .02);
+}
+function noise(dur, o = {}) {
+  if (!A.ctx || !A.on) return;
+  const t = A.ctx.currentTime + (o.at || 0), src = A.ctx.createBufferSource(), g = A.ctx.createGain(), f = A.ctx.createBiquadFilter();
+  src.buffer = A.noise; f.type = o.ftype || 'bandpass'; f.frequency.setValueAtTime(o.f || 1200, t);
+  if (o.fto) f.frequency.exponentialRampToValueAtTime(o.fto, t + dur);
+  f.Q.value = o.q || 1; const v = o.vol || .2; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  src.connect(f); f.connect(g); g.connect(o.bus || A.sfx); src.start(t, Math.random()); src.stop(t + dur + .02);
+}
+const SFX = {
+  tap(m) { if (!A.ctx) return; const n = A.ctx.currentTime; if (n - A.lastTap < .045) return; A.lastTap = n; tone(520 + m * 90 + Math.random() * 40, .06, { vol: .09 }); },
+  heart() { tone(880, .12, { to: 1760, type: 'triangle', vol: .08 }); },
+  combo(l) { [0, 4, 7, 12].forEach((s, i) => tone(523 * Math.pow(2, (s + l * 2) / 12), .09, { at: i * .055, vol: .12 })); },
+  knock() { [0, .14, .28].forEach(a => { tone(140, .09, { type: 'triangle', vol: .35, at: a, to: 70 }); noise(.05, { at: a, f: 400, vol: .2 }); }); },
+  ring() { for (let i = 0; i < 6; i++) tone(i % 2 ? 1180 : 940, .05, { at: i * .055, vol: .09 }); },
+  murmur() { noise(.9, { f: 500, q: .7, vol: .14 }); noise(.7, { f: 800, q: .9, vol: .08, at: .2 }); },
+  mic() { tone(1500, .35, { type: 'sine', to: 2400, vol: .06 }); },
+  alarm() { for (let i = 0; i < 4; i++) tone(i % 2 ? 784 : 523, .14, { at: i * .15, vol: .12, type: 'sawtooth' }); },
+  beep() { tone(988, .08, { vol: .07 }); },
+  glitch() { for (let i = 0; i < 5; i++) noise(.05, { at: i * .07, f: rand(300, 4000), q: 4, vol: .18 }); },
+  whoosh() { noise(.35, { f: 3000, fto: 300, q: .8, vol: .25 }); },
+  good() { tone(660, .08, { vol: .12 }); tone(990, .12, { at: .08, vol: .12 }); },
+  bad() { tone(330, .14, { type: 'sawtooth', vol: .12 }); tone(220, .2, { at: .12, type: 'sawtooth', vol: .12 }); },
+  paper() { noise(.12, { f: 2500, q: 1.5, vol: .12 }); },
+  stamp() { tone(110, .12, { type: 'triangle', vol: .4, to: 60 }); noise(.06, { f: 600, vol: .2 }); },
+  click() { tone(1200, .03, { vol: .06 }); },
+  over() { [784, 659, 523, 440, 392, 330, 262].forEach((f, i) => tone(f, .18, { at: i * .14, vol: .14, type: i > 4 ? 'triangle' : 'square' })); },
+  win() { [523, 659, 784, 1047].forEach((f, i) => tone(f, .12, { at: i * .09, vol: .12 })); }
+};
+const MUSIC = {
+  on: false, step: 0, next: 0, timer: null,
+  lead: [[72,0,76,0,79,0,76,0,74,0,77,0,81,0,77,0],[72,74,76,79,81,79,76,74,72,0,67,0,72,0,0,0],
+         [69,0,72,0,76,0,72,0,71,0,74,0,79,0,74,0],[76,77,79,81,83,81,79,77,76,0,79,0,84,0,0,0]],
+  bass: [48, 53, 45, 55],
+  start() { if (!A.ctx) return; this.on = true; this.step = 0; this.next = A.ctx.currentTime + .05; if (!this.timer) this.timer = setInterval(() => this.tick(), 25); },
+  stop() { this.on = false; },
+  tick() {
+    if (!this.on || !A.ctx || !A.on || A.ctx.state !== 'running') { if (A.ctx) this.next = A.ctx.currentTime + .05; return; }
+    const bpm = [126, 138, 152, 172][G ? G.phase : 0], st = 60 / bpm / 2;
+    while (this.next < A.ctx.currentTime + .12) { this.play(this.step, this.next - A.ctx.currentTime, st); this.next += st; this.step++; }
+  },
+  play(i, at, st) {
+    const bar = Math.floor(i / 16) % 4, s = i % 16, m2f = m => 440 * Math.pow(2, (m - 69) / 12);
+    const n = this.lead[bar][s]; if (n) tone(m2f(n), st * .9, { at, vol: .1, bus: A.mus, type: 'square' });
+    const b = this.bass[bar] + (s % 4 === 2 ? 12 : 0); if (s % 2 === 0) tone(m2f(b), st * 1.6, { at, vol: .16, bus: A.mus, type: 'triangle' });
+    if (s % 4 === 2 || (G && G.phase >= 2 && s % 2 === 1)) noise(.03, { at, f: 7000, q: .5, vol: .05, bus: A.mus });
+    if (s % 8 === 0) noise(.08, { at, f: 160, q: .8, vol: .18, bus: A.mus, ftype: 'lowpass' });
+  }
+};
+
+/* ---------- récords ---------- */
+const REC = { likes: store.get('highScore', 0), aud: store.get('maxAudience', 0), time: store.get('bestSurvivalTime', 0) };
+const seenHints = new Set();
+
+/* ---------- estado ---------- */
+let scene = 'loading', G = null, sceneT = 0, ui = [], pressedUI = null;
+const COMMENTS = {
+  pos: ['¡Salúdame, presidenta!', '¡TAP TAP, GENTE!', '¡Un millón de corazones!', '¡Me mandas un saludo!', '¡Vamos por los 100K!', '¡Mándeme un corazón!', '¡No se vaya del live!'],
+  gov: ['Presidenta, hay reunión de ministros', '¿Quién está gobernando?', '¡La están esperando en el Congreso!', '¿Y la conferencia de prensa?', '¡Tiene documentos por firmar!', '¿Y el ministro de Economía?'],
+  abs: ['Mi presidenta, ¿me manda un saludo a Huancayo?', '¡Presidenta, se escucha bajito!', '¡Póngase el sombrero!', '¡Saludos desde Chiclayo!', 'primeraaa', '¿Ese fondo es real?']
+};
+const USERS = ['tia_rosa', 'lucho_87', 'chabuca.pe', 'el_cholo_tech', 'mari_huanca', 'pepe_del_callao', 'rocio.trujillo', 'kevin_sjl', 'la_doctora_ana', 'jhon_cusco', 'abuela_meche', 'dj_cumbia', 'nancy_ate', 'brayan777'];
+const UCOL = ['#ff8fb1', '#7dd3fc', '#fcd34d', '#86efac', '#c4b5fd', '#fdba74', '#f9a8d4', '#a5f3fc'];
+
+function newGame() {
+  G = {
+    t: 0, likes: 0, viewers: CFG.viewers0, maxViewers: CFG.viewers0, pending: CFG.pending0,
+    combo: 0, lastTap: -99, bonusHit: {}, likeAcc: 0, taps: 0,
+    events: [], nextEventAt: CFG.firstEvent, lastEv: null, blocks: [], timers: [],
+    hearts: [], floats: [], msgs: [], comments: [], nextComment: 1.4,
+    shake: 0, flash: 0, mood: null, moodUntil: 0, tapFrame: 0, lastTapAnim: -9, squash: 0,
+    bubble: null, ignored: 0, phase: 0, ending: null, overT: 0, signEnd: 0,
+    followed: false, trend: 0, trendRef: CFG.viewers0, trendT: 0, alarmT: 0, newRecord: false,
+    tickerT: 6, ticker: null, hatUntil: 0, netDown: false, phaseShown: -1
+  };
+  pushComment('sistema', '¡Keiko inició un LIVE!', COL.gold);
+  setScene('play');
+  MUSIC.start();
+}
+function setScene(s) { scene = s; sceneT = 0; ui = []; }
+
+/* ---------- reglas ---------- */
+const phaseOf = t => { let p = 0; CFG.phases.forEach((ph, i) => { if (t >= ph.start) p = i; }); return p; };
+const multFor = c => { let m = 1; for (const [min, v] of CFG.multipliers) if (c >= min) m = v; return m; };
+const escT = () => Math.max(0, G.t - CFG.escalation.start);
+const autoPending = () => CFG.phases[G.phase].autoPending + CFG.escalation.pendingAccel * escT();
+const intervalScale = () => Math.max(CFG.escalation.minIntervalScale, 1 - CFG.escalation.intervalShrink * escT());
+const blocked = () => G.blocks.some(b => b.until > G.t);
+const awayBlock = () => G.blocks.find(b => b.until > G.t && b.away);
+const busyBlock = () => G.blocks.filter(b => b.until > G.t).sort((a, b) => b.until - a.until)[0];
+function addBlock(sec, label, away) { G.blocks.push({ until: G.t + sec, start: G.t, label, away }); }
+function later(sec, fn) { G.timers.push({ at: G.t + sec, fn }); }
+function addPending(n, x = 180, y = 560) {
+  G.pending = clamp(G.pending + n, 0, 100);
+  floatText((n > 0 ? '+' : '') + n + ' PENDIENTES', x, y, n > 0 ? COL.orange : COL.green, 10);
+  if (n > 0) G.shake = Math.max(G.shake, .25);
+}
+function loseViewers(pct, x = 290, y = 120) {
+  const n = Math.max(CFG.audienceFailMin, G.viewers * pct);
+  G.viewers -= n; floatText('-' + fmt(n) + ' ESPECTADORES', x, y, COL.red, 10, 'right');
+}
+function floatText(s, x, y, c, size = 10, align = 'center') { G.floats.push({ s, x, y, c, size, align, t: 0, life: 1.1 }); if (G.floats.length > 40) G.floats.shift(); }
+function bigMsg(s, c = COL.gold, sub) { G.msgs.push({ s, c, sub, t: 0, life: 1.6 }); if (G.msgs.length > 2) G.msgs.shift(); }
+function setMood(m, sec) { G.mood = m; G.moodUntil = G.t + sec; }
+function say(s, sec = 1.8) { G.bubble = { s, until: G.t + sec }; }
+function pushComment(user, text, c) {
+  G.comments.push({ user, text, c: c || pick(UCOL), t: G.t });
+  if (G.comments.length > 8) G.comments.shift();
+  if (text === '¡Póngase el sombrero!') G.hatUntil = G.t + 3.5;
+}
+function ignoreEv() { G.ignored++; }
+
+function doTap(x, y) {
+  if (G.netDown) { floatText('SIN SEÑAL', x, y - 10, COL.cyan, 8); return; }
+  if (blocked()) { const b = busyBlock(); floatText(b && b.away ? '¡ESTÁ GOBERNANDO!' : '¡ESPERA!', x, y - 10, COL.muted, 8); return; }
+  if (G.t - G.lastTap > CFG.comboTimeout) { G.combo = 0; G.bonusHit = {}; }
+  G.combo++; G.taps++;
+  const m = multFor(G.combo);
+  G.likes += m; G.likeAcc += m;
+  while (G.likeAcc >= CFG.likesPerViewer) { G.viewers += 1; G.likeAcc -= CFG.likesPerViewer; }
+  for (const k in CFG.comboBonus) {
+    const th = +k;
+    if (G.combo >= th && !G.bonusHit[k]) {
+      G.bonusHit[k] = true; G.viewers += CFG.comboBonus[k];
+      floatText('+' + CFG.comboBonus[k] + ' ESPECTADORES', 346, ST + 70, COL.green, 8, 'right'); SFX.combo(Object.keys(CFG.comboBonus).indexOf(k));
+      if (th === 50) { bigMsg('¡TAP TAP, GENTE!', COL.pink); say('¡TAP TAP, GENTE!'); }
+      if (th === 100) bigMsg('¡SOMOS TENDENCIA!', COL.gold);
+    }
+  }
+  G.lastTap = G.t; G.lastTapAnim = G.t; G.tapFrame = (G.tapFrame + 1) % 3; G.squash = .08;
+  const n = m >= 4 ? 2 : 1;
+  for (let i = 0; i < n; i++) {
+    const cols = m >= 5 ? [COL.gold, '#ffe17a', COL.pink] : m >= 3 ? [COL.pink, COL.gold, COL.red] : [COL.red, COL.pink, '#ff6b8a'];
+    G.hearts.push({ x: clamp(x + rand(-18, 18), 20, 340), y: clamp(y, ST + 30, SB - 10), vx: rand(-20, 20), vy: rand(-150, -95), p: m >= 4 ? 3 : 2 + (Math.random() < .3), c: pick(cols), t: 0, life: rand(1.1, 1.6), ph: rand(0, 6) });
+  }
+  if (G.hearts.length > 110) G.hearts.splice(0, G.hearts.length - 110);
+  floatText('+' + m, x + rand(-10, 10), y - 26, m >= 3 ? COL.gold : COL.white, m >= 3 ? 12 : 10);
+  SFX.tap(m);
+  try { if (navigator.vibrate && G.taps % 4 === 0) navigator.vibrate(6); } catch (e) {}
+}
+
+function endGame(type) {
+  if (G.ending) return;
+  G.ending = type; G.overT = 0; G.bubble = null; G.events = [];
+  G.newRecord = G.likes > REC.likes;
+  REC.likes = Math.max(REC.likes, G.likes); REC.aud = Math.max(REC.aud, Math.floor(G.maxViewers)); REC.time = Math.max(REC.time, Math.floor(G.t));
+  store.set('highScore', REC.likes); store.set('maxAudience', REC.aud); store.set('bestSurvivalTime', REC.time);
+  MUSIC.stop(); SFX.alarm(); setTimeout(() => SFX.over(), 500);
+  G.shake = 1.2; setScene('over');
+}
+
+/* ---------- eventos (interrupciones presidenciales) ---------- */
+class Ev {
+  constructor(id) { this.id = id; this.c = CFG.events[id]; this.t0 = G.t; this.done = false; this.z = 2; this.firstTime = !seenHints.has(id); seenHints.add(id); }
+  get age() { return G.t - this.t0; }
+  get locked() { return this.age < CFG.inputLock; }
+  hit() { return false; } down() { return true; } move() {} up() {} update() {} draw() {}
+  timer(x, y, w, frac, c = COL.gold) { R(x, y, w, 4, '#0008'); R(x, y, w * clamp(frac, 0, 1), 4, frac < .3 ? COL.red : c); }
+  hint(s, x, y) { if (!this.firstTime) return; const a = .65 + .35 * Math.sin(G.t * 8); T(s, x, y, { size: 8, font: F1, color: COL.gold, align: 'center', outline: COL.ink, ow: 4, alpha: a }); }
+}
+function bubble(x, y, text, maxW, tail = 'down', o = {}) {
+  const size = o.size || 12, lines = wrap(text, maxW - 16, size), lh = size + 3;
+  const w = Math.min(maxW, Math.max(...lines.map(l => tw(l, size))) + 18), h = lines.length * lh + 12;
+  let bx = clamp(x - w / 2, 6, W - 6 - w), by = y - h;
+  rr(bx, by, w, h, 6, '#ffffff', COL.ink, 2);
+  ctx.fillStyle = '#ffffff'; ctx.beginPath();
+  const tx = clamp(x, bx + 12, bx + w - 12);
+  ctx.moveTo(tx - 6, by + h - 1); ctx.lineTo(tx + (o.tailDx || 4), by + h + 9); ctx.lineTo(tx + 7, by + h - 1); ctx.fill();
+  lines.forEach((l, i) => T(l, bx + 9, by + 7 + i * lh, { size, color: '#1b2134' }));
+  return [bx, by, w, h];
+}
+
+// EVENTO 01 — EL MINISTRO: deslizarlo fuera de pantalla
+class Minister extends Ev {
+  constructor() {
+    super('minister'); this.x = -60; this.y = SB - 6; this.tx = 84; this.state = 'in'; this.drag = null; this.s = 1.45;
+    SFX.knock(); setMood('angry', 1.2); pushComment(pick(USERS), 'Presidenta, hay reunión de ministros');
+  }
+  rect() { const im = IMG.ministro, w = im.width * this.s, h = im.height * this.s; return [this.x - w / 2, this.y - h, w, h]; }
+  hit(x, y) { return this.state !== 'fly' && inR(x, y, this.rect()); }
+  down(p) { this.drag = { sx: p.x, sy: p.y, ox: this.x, oy: this.y, lx: p.x, ly: p.y, lt: performance.now(), vx: 0, vy: 0 }; return true; }
+  move(p) {
+    const d = this.drag; if (!d) return; const now = performance.now(), dt = Math.max(8, now - d.lt);
+    d.vx = d.vx * .5 + (p.x - d.lx) / dt * 500; d.vy = d.vy * .5 + (p.y - d.ly) / dt * 500; d.lx = p.x; d.ly = p.y; d.lt = now;
+    this.x = d.ox + (p.x - d.sx); this.y = d.oy + (p.y - d.sy) * .35;
+  }
+  up(p) {
+    const d = this.drag; if (!d) return; this.drag = null;
+    const dx = p.x - d.sx, dy = p.y - d.sy;
+    if (Math.hypot(dx, dy) > 34 || Math.hypot(d.vx, d.vy) > 450) this.fling(dx, dy, d.vx, d.vy);
+    else { this.x = d.ox; this.y = d.oy; }
+  }
+  fling(dx, dy, vx, vy) {
+    this.state = 'fly'; const dir = Math.abs(dx) > 4 ? Math.sign(dx) : -1;
+    this.vx = dir * Math.max(900, Math.abs(vx) * 1.2); this.vy = Math.min(-250, vy * .5 - 300); this.rot = 0;
+    SFX.whoosh(); if (!this.failed) { floatText('¡FUERA!', this.x, this.y - 150, COL.green, 12); SFX.good(); }
+    say(pick(['¡Después, después!', '¡Estoy en vivo!', '¡Ahorita no!']), 1.4);
+  }
+  update(dt) {
+    if (this.drag) return;
+    if (this.state === 'in') { this.x += (this.tx - this.x) * Math.min(1, dt * 5); if (this.age > this.c.limit) this.fail(); }
+    else if (this.state === 'block') { this.x += (this.tx - this.x) * Math.min(1, dt * 4); if (G.t > this.blockUntil) { this.state = 'leave'; } }
+    else if (this.state === 'leave') { this.x -= 260 * dt; if (this.x < -80) this.done = true; }
+    else if (this.state === 'fly') { this.x += this.vx * dt; this.y += this.vy * dt; this.vy += 1700 * dt; this.rot += dt * 10 * Math.sign(this.vx); if (this.x < -120 || this.x > W + 120 || this.y > H + 200) this.done = true; }
+  }
+  fail() {
+    this.failed = true; this.state = 'block'; this.tx = 150; this.blockUntil = G.t + this.c.failBlock;
+    addPending(this.c.failPending, this.x + 40, this.y - 160); ignoreEv(); SFX.bad(); setMood('angry', this.c.failBlock);
+  }
+  draw() {
+    const walk = this.state === 'in' && Math.abs(this.tx - this.x) > 3 ? Math.sin(G.t * 18) * 2 : 0;
+    spr('ministro', this.x, this.y + walk, this.s, { rot: this.state === 'fly' ? this.rot : 0 });
+    if (this.state === 'in') {
+      const r = this.rect();
+      bubble(this.x + 40, r[1] - 4, 'Presidenta, necesitamos una reunión urgente.', 190);
+      this.timer(r[0] + 10, this.y + 2 - 10, r[2] - 20, 1 - this.age / this.c.limit);
+      this.hint('← DESLÍZALO', this.x + 6, r[1] + r[3] * .45);
+    } else if (this.state === 'block') bubble(this.x + 30, this.rect()[1] - 4, 'Bla bla bla… presupuesto… bla bla…', 170);
+  }
+}
+
+// EVENTO 02 / 06 / 08 — ventanas de decisión
+class Modal extends Ev {
+  constructor(id) { super(id); this.z = 5; this.box = [22, 146, 316, 250]; this.btnA = [36, 330, 138, 52]; this.btnB = [186, 330, 138, 52]; this.choice = null; }
+  hit(x, y) { return inR(x, y, this.box); }
+  down(p) {
+    if (this.locked || this.choice) return true;
+    if (inR(p.x, p.y, this.btnA)) { this.choice = 'A'; SFX.click(); this.pickA(); this.close(); }
+    else if (inR(p.x, p.y, this.btnB)) { this.choice = 'B'; SFX.click(); this.pickB(); this.close(); }
+    return true;
+  }
+  close() { this.closeT = G.t; }
+  update() { if (this.closeT !== undefined) { if (G.t - this.closeT > .15) this.done = true; return; } if (this.age > this.c.limit) { this.choice = 'T'; this.timeout(); this.close(); } }
+  frame(title, accent) {
+    const [x, y, w, h] = this.box, k = ease(this.age / .18), sc = this.closeT !== undefined ? 1 - (G.t - this.closeT) / .15 : .85 + .15 * k;
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.scale(sc, sc); ctx.translate(-(x + w / 2), -(y + h / 2));
+    rr(x + 3, y + 5, w, h, 8, '#0009'); rr(x, y, w, h, 8, COL.panel, COL.line, 2);
+    rr(x, y, w, 26, [8, 8, 0, 0], accent || COL.panel2); T(title, x + w / 2, y + 8, { size: 8, font: F1, align: 'center', color: COL.fg });
+    this.timer(x + 10, y + h - 10, w - 20, 1 - this.age / this.c.limit);
+    return () => ctx.restore();
+  }
+  buttons(a, asub, ac, b, bsub, bc) {
+    const al = this.locked ? .45 : 1;
+    btn(this.btnA, a, ac, { sub: asub, alpha: al, size: 13 }); btn(this.btnB, b, bc, { sub: bsub, alpha: al, size: b.length > 12 ? 11 : 13 });
+  }
+}
+class Congress extends Modal {
+  constructor() { super('congress'); SFX.ring(); this.ringT = 0; pushComment(pick(USERS), '¡La están esperando en el Congreso!'); }
+  pickA() { addBlock(this.c.answerBlock, 'EN LLAMADA CON EL CONGRESO', true); addPending(this.c.answerPending); SFX.good(); }
+  pickB() { addPending(this.c.rejectPending); ignoreEv(); say('¡Después llamo!', 1.4); }
+  timeout() { addPending(this.c.rejectPending); ignoreEv(); floatText('LLAMADA PERDIDA', 180, 300, COL.red, 10); }
+  update(dt) { super.update(dt); this.ringT -= dt; if (this.ringT < 0 && !this.choice) { SFX.ring(); this.ringT = .9; } }
+  draw() {
+    const end = this.frame('CONGRESO LLAMANDO…', '#2c3554');
+    const [x, y] = this.box, cx = x + 158, cy = y + 104, sh = Math.sin(G.t * 40) * (G.t % .9 < .45 ? 2 : 0);
+    ctx.strokeStyle = COL.fg; ctx.lineWidth = 3;
+    for (let i = 1; i <= 2; i++) { const a = (G.t * 2 + i * .5) % 1; ctx.globalAlpha = 1 - a; ctx.beginPath(); ctx.arc(cx, cy, 46 + a * 22 + i * 4, -.5, .5); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, 46 + a * 22 + i * 4, Math.PI - .5, Math.PI + .5); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx + sh, cy, 46, 0, Math.PI * 2); ctx.fillStyle = '#c4b5fd'; ctx.fill(); ctx.clip();
+    spr('congreso', cx + sh, cy + 74, 1.25); ctx.restore();
+    ctx.beginPath(); ctx.arc(cx + sh, cy, 46, 0, Math.PI * 2); ctx.strokeStyle = COL.fg; ctx.lineWidth = 3; ctx.stroke();
+    T('Mesa Directiva · Línea 1', cx, y + 158, { size: 12, align: 'center', color: COL.muted, weight: 600 });
+    this.buttons('CONTESTAR', '−12 pendientes', 'green', 'RECHAZAR', '+10 pendientes', 'red');
+    end(); this.hint('¿CONTESTAS O SIGUES EN LIVE?', 180, this.box[1] - 16);
+  }
+}
+const EMERGENCIES = ['Huaico en la Carretera Central', 'Sismo de 6,1 en la costa', 'Paro nacional de transportistas', 'Friaje en el sur andino', 'Desborde del río Rímac', 'Corte de agua en media Lima'];
+class Emergency extends Modal {
+  constructor() { super('emergency'); this.what = pick(EMERGENCIES); this.alT = 0; G.flash = .4; pushComment(pick(USERS), '¡Presidenta, hay una emergencia!'); }
+  pickA() { addBlock(this.c.attendBlock, 'ATENDIENDO LA EMERGENCIA', true); addPending(this.c.attendPending); SFX.good(); }
+  pickB() { addPending(this.c.ignorePending); ignoreEv(); say('¡Un ratito, que estoy en vivo!', 2.2); }
+  timeout() { this.pickB(); }
+  update(dt) { super.update(dt); this.alT -= dt; if (this.alT < 0 && !this.choice) { SFX.alarm(); this.alT = 1.1; } if (!this.choice) G.flash = Math.max(G.flash, .18); }
+  draw() {
+    const end = this.frame('EMERGENCIA NACIONAL', COL.red2);
+    const [x, y, w] = this.box, im = IMG.bg_emergencia;
+    if (im) { ctx.save(); rr(x + 10, y + 34, w - 20, 132, 4, '#6e0f1c'); ctx.clip(); const s = 132 / im.height, iw = im.width * s; ctx.drawImage(im, x + w / 2 - iw / 2, y + 34, iw, 132); ctx.restore(); }
+    else T('¡EMERGENCIA NACIONAL!', x + w / 2, y + 80, { size: 12, font: F1, align: 'center', color: COL.fg });
+    rr(x + 10, y + 34, w - 20, 132, 4, null, '#ff6b6b', 2);
+    T(this.what, x + w / 2, y + 172, { size: 14, align: 'center', color: COL.gold });
+    this.buttons('ATENDER', '−20 pendientes', 'blue', 'SEGUIR EN LIVE', '+25 pendientes', 'red');
+    end();
+  }
+}
+class Advisor extends Modal {
+  constructor() { super('advisor'); SFX.ring(); pushComment(pick(USERS), '¿Y el ministro de Economía?'); }
+  pickA() { addBlock(this.c.resolveBlock, 'RESOLVIENDO LA CRISIS DEL GABINETE', true); addPending(this.c.resolvePending); SFX.good(); }
+  pickB() { addPending(this.c.delegatePending); ignoreEv(); say('¡Que lo vea otro!', 1.4); }
+  timeout() { this.pickB(); }
+  draw() {
+    const end = this.frame('ASESOR PRESIDENCIAL', '#2c3554');
+    const [x, y] = this.box;
+    spr('asesor', x + 66, y + 182, 1.35);
+    bubble(x + 210, y + 116, 'Presidenta, hay una crisis en el gabinete.', 176, 'down', { size: 13 });
+    this.buttons('RESOLVER', '−15 pendientes', 'blue', 'QUE LO VEA OTRO', '+12 pendientes', 'gold');
+    end();
+  }
+}
+
+// EVENTO 03 — PROTESTA CIUDADANA: tocar 3 veces la X
+class Protest extends Ev {
+  constructor() { super('protest'); this.z = 3; this.box = [10, 258, 340, 186]; this.taps = 0; this.x = [this.box[0] + this.box[2] - 34, this.box[1] + 3, 30, 22]; SFX.murmur(); this.mT = 1.2; this.shk = 0; pushComment(pick(USERS), '¡Atienda, presidenta!'); }
+  hit(x, y) { return inR(x, y, this.box); }
+  down(p) {
+    if (this.closing) return true;
+    const xr = [this.x[0] - 6, this.x[1] - 6, this.x[2] + 12, this.x[3] + 12];
+    if (!this.locked && inR(p.x, p.y, xr)) {
+      this.taps++; this.shk = .15; SFX.click();
+      if (this.taps >= this.c.taps) { this.closing = G.t; SFX.good(); floatText('¡CERRADO!', 180, this.box[1] + 40, COL.green, 12); }
+    }
+    return true;
+  }
+  update(dt) {
+    this.shk = Math.max(0, this.shk - dt); this.mT -= dt; if (this.mT < 0 && !this.closing) { SFX.murmur(); this.mT = 1.4; }
+    if (this.closing !== undefined && G.t - this.closing > .2) this.done = true;
+    if (!this.closing && this.age > this.c.limit) { loseViewers(this.c.failAudiencePct); addPending(this.c.failPending, 180, 300); ignoreEv(); SFX.bad(); setMood('sad', 1.5); this.closing = G.t; }
+  }
+  draw() {
+    const [x0, y0, w, h] = this.box, k = ease(this.age / .2), off = (1 - k) * 60 + (this.shk ? Math.sin(G.t * 90) * 3 : 0);
+    const sc = this.closing !== undefined ? 1 - (G.t - this.closing) / .2 : 1;
+    ctx.save(); ctx.globalAlpha = clamp(sc, 0, 1); ctx.translate(off, 0);
+    rr(x0 + 3, y0 + 5, w, h, 8, '#0009'); rr(x0, y0, w, h, 8, COL.panel, COL.line, 2);
+    rr(x0, y0, w, 28, [8, 8, 0, 0], COL.red2); T('MANIFESTACIONES', x0 + 12, y0 + 10, { size: 8, font: F1, color: COL.fg });
+    ctx.save(); rr(x0 + 6, y0 + 32, w - 12, h - 38, 4); ctx.clip();
+    const bg = IMG.bg_protesta; if (bg) { const s = (w - 12) / bg.width; ctx.drawImage(bg, x0 + 6, y0 + 32 - 20, bg.width * s, bg.height * s); }
+    const march = Math.sin(G.t * 6) * 3;
+    spr('manifestantes', x0 + w / 2 - 20 + Math.sin(G.t * 1.6) * 10, y0 + h - 2 + Math.abs(march), 1.12);
+    spr('policia', x0 + w - 40, y0 + h - 2, .95);
+    ctx.restore();
+    // botón X pequeño: 3 toques
+    const [xx, xy, xw, xh] = this.x, left = this.c.taps - this.taps;
+    rr(xx, xy, xw, xh, 11, '#ffffff', COL.ink, 2); T('×', xx + xw / 2, xy + 1, { size: 18, align: 'center', color: COL.ink });
+    for (let i = 0; i < this.c.taps; i++) R(xx - 22 + i * 7, xy + 9, 5, 5, i < this.taps ? COL.green : '#ffffff55');
+    this.timer(x0 + 10, y0 + h - 9, w - 20, 1 - this.age / this.c.limit);
+    ctx.restore();
+    this.hint('TOCA ' + left + ' VECES LA X', 200, y0 - 14);
+  }
+}
+
+// EVENTO 04 — PERIODISTA: mantener presionado «AHORA NO»
+const QUESTIONS = ['¿Quién gobierna mientras usted transmite?', '¿Cuándo presenta el plan de gobierno?', '¿Por qué no fue al Consejo de Ministros?', '¿Qué dice de las obras paralizadas?', '¿Cuántos ministros juramentaron esta semana?', '¿Va a responder o seguirá en vivo?'];
+class Journalist extends Ev {
+  constructor() { super('journalist'); this.z = 2; this.x = W + 60; this.tx = 290; this.y = SB - 4; this.btn = [206, 384, 142, 44]; this.hold = 0; this.holding = false; this.state = 'in'; SFX.mic(); pushComment(pick(USERS), '¿Y la conferencia de prensa?'); }
+  hit(x, y) { if (this.state === 'in') return inR(x, y, this.btn); if (this.state === 'q') return inR(x, y, [28, 170, 304, 150]); return false; }
+  down(p) { if (this.state === 'in' && !this.locked) { this.holding = true; SFX.click(); } return true; }
+  up() { this.holding = false; }
+  update(dt) {
+    if (this.state === 'in') {
+      this.x += (this.tx - this.x) * Math.min(1, dt * 5);
+      if (this.holding) { this.hold += dt; if (this.hold >= this.c.hold) { this.state = 'leave'; this.holding = false; SFX.good(); floatText('¡SIN PREGUNTAS!', 280, 300, COL.green, 10); say('¡Ahora no, estoy en vivo!', 1.4); } }
+      else this.hold = Math.max(0, this.hold - dt * 1.5);
+      if (this.state === 'in' && this.age > this.c.limit) {
+        this.state = 'q'; this.q = pick(QUESTIONS); this.qT = G.t; this.holding = false;
+        addBlock(this.c.failBlock, 'RESPONDIENDO A LA PRENSA', false); addPending(this.c.failPending, 280, 300); ignoreEv(); SFX.bad(); setMood('interview', this.c.failBlock);
+      }
+    } else if (this.state === 'q') { if (G.t - this.qT > this.c.failBlock) this.state = 'leave'; }
+    else if (this.state === 'leave') { this.x += 300 * dt; if (this.x > W + 80) this.done = true; }
+  }
+  draw() {
+    spr('periodista', this.x, this.y, 1.45, { flip: true });
+    if (this.state === 'in') {
+      bubble(this.x - 60, 286, 'Presidenta, ¿puede responder una pregunta?', 200, 'down', { tailDx: 10 });
+      const [bx, by, bw, bh] = this.btn, f = this.hold / this.c.hold, al = this.locked ? .5 : 1;
+      ctx.globalAlpha = al;
+      rr(bx, by, bw, bh, 8, COL.blue2, COL.ink, 2); rr(bx, by, bw * clamp(f, 0, 1), bh, 8, COL.green);
+      rr(bx, by, bw, bh - 4, 8, null, '#ffffff33', 2);
+      T('AHORA NO', bx + bw / 2, by + 10, { size: 10, font: F1, align: 'center', color: '#fff' });
+      T('mantén presionado', bx + bw / 2, by + 27, { size: 11, align: 'center', color: '#dbe4ff', weight: 600 });
+      ctx.globalAlpha = 1;
+      this.timer(bx, by + bh + 6, bw, 1 - this.age / this.c.limit);
+      this.hint('MANTÉN PRESIONADO', 276, by - 12);
+    } else if (this.state === 'q') {
+      rr(31, 173, 304, 150, 8, '#0009'); rr(28, 170, 304, 150, 8, COL.panel, COL.line, 2);
+      rr(28, 170, 304, 26, [8, 8, 0, 0], COL.pink2); T('RUEDA DE PRENSA', 180, 179, { size: 8, font: F1, align: 'center' });
+      wrap(this.q, 270, 16).forEach((l, i) => T(l, 180, 210 + i * 20, { size: 16, align: 'center', color: COL.fg }));
+      const left = Math.ceil(this.c.failBlock - (G.t - this.qT));
+      T('Keiko responde… ' + left, 180, 292, { size: 12, align: 'center', color: COL.muted, weight: 600 });
+    }
+  }
+}
+
+// EVENTO 05 — DOCUMENTOS: arrastrar a DESPUÉS o a FIRMAR
+class Documents extends Ev {
+  constructor() {
+    super('documents'); this.z = 1;
+    const n = G.phase >= 3 ? this.c.countLate : this.c.count;
+    this.later = [12, 380, 128, 62]; this.sign = [220, 380, 128, 62];
+    this.docs = [];
+    for (let i = 0; i < n; i++) {
+      const tx = 70 + (i + .5) * (220 / n) + rand(-14, 14), ty = rand(226, 330);
+      this.docs.push({ x: tx, y: -60 - i * 40, tx, ty, vy: 0, st: 'fall', img: i % 2 ? 'docs_pila' : 'docs_urgente', num: String(40 + ((Math.random() * 59) | 0)).padStart(3, '0') });
+    }
+    this.signing = 0; SFX.paper(); pushComment(pick(USERS), '¡Tiene documentos por firmar!');
+  }
+  docRect(d) { return [d.x - 32, d.y - 40, 64, 80]; }
+  hit(x, y) {
+    if (inR(x, y, this.later) || inR(x, y, this.sign)) return this.docs.some(d => d.st !== 'gone');
+    return this.docs.some(d => (d.st === 'rest' || d.st === 'fall') && inR(x, y, this.docRect(d)));
+  }
+  down(p) {
+    for (let i = this.docs.length - 1; i >= 0; i--) {
+      const d = this.docs[i];
+      if ((d.st === 'rest' || d.st === 'fall') && inR(p.x, p.y, this.docRect(d))) { d.st = 'drag'; d.ox = p.x - d.x; d.oy = p.y - d.y; this.dragging = d; this.docs.splice(i, 1); this.docs.push(d); SFX.paper(); return true; }
+    }
+    return true;
+  }
+  move(p) { const d = this.dragging; if (!d) return; d.x = clamp(p.x - d.ox, 20, 340); d.y = clamp(p.y - d.oy, ST + 30, SB + 20); }
+  up(p) {
+    const d = this.dragging; if (!d) return; this.dragging = null;
+    if (inR(d.x, d.y + 20, this.later)) { d.st = 'gone'; addPending(this.c.laterPending, this.later[0] + 64, this.later[1] - 10); if (!this.ign) { ignoreEv(); this.ign = true; } SFX.paper(); }
+    else if (inR(d.x, d.y + 20, this.sign)) {
+      d.st = 'signing'; d.x = this.sign[0] + 112; d.y = this.sign[1] + 18;
+      const start = Math.max(G.t, G.signEnd); G.signEnd = start + this.c.signTime; d.signStart = start; d.signEnd = G.signEnd;
+      G.blocks.push({ until: G.signEnd, start, label: 'FIRMANDO DECRETO', away: false }); this.signing++;
+      later(G.signEnd - G.t, () => { d.st = 'gone'; this.signing--; addPending(this.c.signPending, this.sign[0] + 64, this.sign[1] - 10); SFX.stamp(); });
+      setMood('sign', G.signEnd - G.t);
+    } else { d.st = 'rest'; d.ty = d.y; }
+  }
+  update(dt) {
+    for (const d of this.docs) if (d.st === 'fall') { d.vy += 1400 * dt; d.y += d.vy * dt; if (d.y >= d.ty) { d.y = d.ty; d.st = 'rest'; SFX.paper(); } }
+    if (this.age > this.c.limit && !this.timedOut) {
+      this.timedOut = true; let n = 0;
+      for (const d of this.docs) if (d.st === 'rest' || d.st === 'fall' || d.st === 'drag') { d.st = 'gone'; n++; }
+      if (n) { addPending(this.c.laterPending * n, 180, 300); if (!this.ign) { ignoreEv(); this.ign = true; } floatText('SE QUEDARON PARA DESPUÉS', 180, 250, COL.orange, 9); }
+      this.dragging = null;
+    }
+    if (this.docs.every(d => d.st === 'gone')) this.done = true;
+  }
+  draw() {
+    const live = this.docs.some(d => d.st === 'rest' || d.st === 'fall' || d.st === 'drag');
+    if (live) {
+      rr(80, ST + 8, 200, 24, 6, COL.panel, COL.line, 2); T('DECRETOS PENDIENTES', 180, ST + 16, { size: 8, font: F1, align: 'center', color: COL.gold });
+      const drag = this.dragging, hiL = drag && inR(drag.x, drag.y + 20, this.later), hiS = drag && inR(drag.x, drag.y + 20, this.sign);
+      tray(this.later, 'DESPUÉS', '+5 pendientes', COL.gold, hiL, 'box');
+      tray(this.sign, 'FIRMAR', 'tarda 2 s · −8', COL.blue, hiS, 'pen');
+      this.timer(this.later[0], this.later[1] - 8, 336, 1 - this.age / this.c.limit);
+    }
+    for (const d of this.docs) {
+      if (d.st === 'gone') continue;
+      const s = d.st === 'signing' ? .3 : (d.st === 'drag' ? .78 : .72);
+      const r = spr(d.img, d.x, d.y + 40, s, { rot: d.st === 'drag' ? Math.sin(G.t * 10) * .05 : 0 });
+      if (d.st !== 'signing') T('D.S. N.° ' + d.num + '-2026-PCM', d.x, d.y + 30, { size: 9, align: 'center', color: '#1b2134', outline: '#ffffffcc', ow: 3 });
+      if (d.st === 'signing') { const f = clamp((G.t - d.signStart) / (d.signEnd - d.signStart), 0, 1); R(this.sign[0] + 8, this.sign[1] + 52, 112, 5, '#0008'); R(this.sign[0] + 8, this.sign[1] + 52, 112 * f, 5, COL.green); }
+    }
+    if (live) this.hint('ARRÁSTRALOS A UNA BANDEJA', 180, 350);
+  }
+}
+function tray(r, label, sub, c, hi, icon) {
+  const [x, y, w, h] = r;
+  rr(x, y, w, h, 8, hi ? c : COL.panel, hi ? '#fff' : c, 3);
+  if (icon === 'box') spr('docs_caja', x + 26, y + h - 6, .55);
+  else { ctx.save(); ctx.translate(x + 24, y + 32); ctx.rotate(-.7); R(-4, -18, 8, 28, hi ? '#fff' : c); R(-4, 10, 8, 6, COL.gold); R(-2, 16, 4, 5, '#fff'); ctx.restore(); }
+  T(label, x + 50, y + 14, { size: 10, font: F1, color: hi ? COL.ink : '#fff' });
+  T(sub, x + 50, y + 34, { size: 11, color: hi ? COL.ink : COL.muted, weight: 600 });
+}
+
+// EVENTO 07 — SE CAYÓ EL INTERNET: tocar 10 veces el wifi
+class Internet extends Ev {
+  constructor() { super('internet'); this.z = 4; this.taps = 0; this.pos = [180, 290]; this.r = 42; G.netDown = true; SFX.glitch(); pushComment(pick(USERS), '¡Presidenta, se escucha bajito!'); }
+  hit(x, y) { return y >= ST && y <= SB; }
+  down(p) {
+    if (this.closing !== undefined) return true;
+    if (!this.locked && Math.hypot(p.x - this.pos[0], p.y - this.pos[1]) < this.r + 8) {
+      this.taps++; SFX.beep(); this.pulse = .12;
+      if (this.taps % 3 === 0 && this.taps < this.c.taps) this.pos = [rand(90, 270), rand(220, 380)];
+      if (this.taps >= this.c.taps) { this.closing = G.t; G.netDown = false; SFX.good(); floatText('¡CONECTADO!', 180, 250, COL.green, 12); }
+    }
+    return true;
+  }
+  update(dt) {
+    this.pulse = Math.max(0, (this.pulse || 0) - dt);
+    if (this.closing !== undefined) { if (G.t - this.closing > .2) this.done = true; return; }
+    if (this.age > this.c.limit) { this.closing = G.t; G.netDown = false; loseViewers(this.c.failAudiencePct); SFX.bad(); setMood('sad', 1.5); }
+  }
+  draw() {
+    const a = this.closing !== undefined ? 1 - (G.t - this.closing) / .2 : 1;
+    ctx.save(); ctx.globalAlpha = clamp(a, 0, 1);
+    R(0, ST, W, SB - ST, 'rgba(8,10,20,.62)');
+    for (let i = 0; i < 70; i++) { const y = ST + Math.random() * (SB - ST), x = Math.random() * W; R(x, y, rand(4, 40), rand(1, 4), pick(['#ff3d7f55', '#38bdf855', '#ffffff40', '#22c55e40'])); }
+    for (let y = ST; y < SB; y += 4) R(0, y, W, 1, '#00000030');
+    rr(70, ST + 14, 220, 52, 8, COL.panel, COL.line, 2);
+    T('CONEXIÓN INESTABLE', 180, ST + 24, { size: 8, font: F1, align: 'center', color: COL.cyan });
+    const lvl = Math.floor(this.taps / 2);
+    for (let i = 0; i < 5; i++) { const bh = 4 + i * 3; R(138 + i * 18, ST + 56 - bh, 12, bh, i < lvl ? COL.green : '#ffffff30'); }
+    const [px, py] = this.pos, s = this.r * (1 + (this.pulse || 0) * 1.5);
+    ctx.beginPath(); ctx.arc(px, py, s, 0, Math.PI * 2); ctx.fillStyle = COL.panel; ctx.fill(); ctx.strokeStyle = COL.cyan; ctx.lineWidth = 3; ctx.stroke();
+    wifi(px, py + s * .35, s * 1.25, COL.cyan, 1 + (this.taps % 3));
+    T(this.taps + '/' + this.c.taps, px, py + s + 8, { size: 10, font: F1, align: 'center', color: '#fff', outline: COL.ink, ow: 4 });
+    this.timer(70, SB - 14, 220, 1 - this.age / this.c.limit, COL.cyan);
+    ctx.restore();
+    this.hint('TOCA EL WIFI 10 VECES', 180, ST + 80);
+  }
+}
+const EVENTS = { minister: Minister, congress: Congress, protest: Protest, journalist: Journalist, documents: Documents, emergency: Emergency, internet: Internet, advisor: Advisor };
+const SLOT = { minister: 'left', journalist: 'right', congress: 'modal', emergency: 'modal', advisor: 'modal', protest: 'bottom', documents: 'docs', internet: 'net' };
+
+function spawnEvent() {
+  const ph = CFG.phases[G.phase];
+  const busy = new Set(G.events.map(e => SLOT[e.id]));
+  let opts = ph.events.filter(id => !busy.has(SLOT[id]));
+  if (G.netDown) opts = opts.filter(id => id !== 'protest' && id !== 'documents');
+  if (opts.length > 1) { const f = opts.filter(id => id !== G.lastEv); if (f.length) opts = f; }
+  if (!opts.length) return false;
+  const id = pick(opts); G.lastEv = id;
+  G.events.push(new EVENTS[id]());
+  return true;
+}
+
+/* ---------- actualización ---------- */
+function update(dt) {
+  sceneT += dt;
+  if (scene === 'title' || scene === 'loading') { titleUpdate(dt); return; }
+  if (scene === 'over') { G.overT += dt; updateFx(dt); return; }
+  if (scene !== 'play') return;
+  G.t += dt;
+  const p = phaseOf(G.t);
+  if (p !== G.phaseShown) { G.phaseShown = p; G.phase = p; bigMsg('FASE ' + (p + 1), p >= 2 ? COL.red : COL.gold, CFG.phases[p].name); if (p > 0) SFX.win(); }
+  // combo
+  if (G.combo > 0 && G.t - G.lastTap > CFG.comboTimeout) { if (G.combo >= 10) floatText('COMBO PERDIDO', 296, 150, COL.muted, 8, 'right'); G.combo = 0; G.bonusHit = {}; }
+  // audiencia por inactividad
+  const idle = G.t - G.lastTap;
+  if (idle > CFG.inactivityDelay && G.t > CFG.inactivityDelay) G.viewers -= (CFG.inactivityLoss + CFG.inactivityLossPct[G.phase] * G.viewers) * dt;
+  G.maxViewers = Math.max(G.maxViewers, G.viewers);
+  G.trendT += dt; if (G.trendT > .6) { G.trend = G.viewers - G.trendRef; G.trendRef = G.viewers; G.trendT = 0; }
+  // pendientes automáticos
+  G.pending = clamp(G.pending + autoPending() * dt, 0, 100);
+  if (G.pending >= 85) { G.alarmT -= dt; if (G.alarmT < 0) { SFX.beep(); G.alarmT = .9; } }
+  // temporizadores
+  for (let i = G.timers.length - 1; i >= 0; i--) if (G.t >= G.timers[i].at) { const t = G.timers[i]; G.timers.splice(i, 1); t.fn(); }
+  G.blocks = G.blocks.filter(b => b.until > G.t - .5);
+  // interrupciones
+  if (G.t >= G.nextEventAt) {
+    const ph = CFG.phases[G.phase];
+    if (G.events.length < ph.max && spawnEvent()) G.nextEventAt = G.t + rand(ph.interval[0], ph.interval[1]) * intervalScale();
+    else G.nextEventAt = G.t + .6;
+  }
+  for (const e of G.events) e.update(dt);
+  G.events = G.events.filter(e => !e.done);
+  if (!G.events.some(e => e.id === 'internet')) G.netDown = false;
+  // comentarios
+  G.nextComment -= dt;
+  if (G.nextComment <= 0) {
+    const govP = G.pending >= 30 ? .45 : .2, r = Math.random();
+    pushComment(pick(USERS), pick(r < govP ? COMMENTS.gov : r < govP + .45 ? COMMENTS.pos : COMMENTS.abs));
+    let iv = rand(2, 4); if (G.viewers > 1000) iv *= .55; if (G.pending >= 30) iv *= .8; G.nextComment = iv;
+  }
+  // ticker
+  G.tickerT -= dt; if (G.tickerT < 0) { G.ticker = { s: pick(['¡TAP TAP, GENTE!', '¡NO SE VAYAN DEL LIVE!', '¡COMPARTAN EL LIVE!']), t: G.t }; G.tickerT = rand(9, 14); }
+  updateFx(dt);
+  // fin
+  if (G.pending >= 100) endGame('gov');
+  else if (G.viewers <= 0) { G.viewers = 0; endGame('aud'); }
+}
+function updateFx(dt) {
+  for (const h of G.hearts) { h.t += dt; h.x += (h.vx + Math.sin(h.t * 5 + h.ph) * 30) * dt; h.y += h.vy * dt; }
+  G.hearts = G.hearts.filter(h => h.t < h.life);
+  for (const f of G.floats) { f.t += dt; f.y -= 34 * dt; }
+  G.floats = G.floats.filter(f => f.t < f.life);
+  for (const m of G.msgs) m.t += dt;
+  G.msgs = G.msgs.filter(m => m.t < m.life);
+  G.shake = Math.max(0, G.shake - dt); G.flash = Math.max(0, G.flash - dt); G.squash = Math.max(0, G.squash - dt);
+}
+
+/* ---------- Keiko: elige pose según lo que pasa ---------- */
+function keikoPose() {
+  const t = G.t;
+  if (G.ending === 'gov') return 'gameover1';
+  if (G.ending === 'aud') return G.overT % 1 < .5 ? 'sad1' : 'sad2';
+  if (G.mood === 'interview' && G.moodUntil > t) return t % .6 < .3 ? 'angry1' : 'angry2';
+  if (G.mood === 'sign' && G.moodUntil > t) return 'president1';
+  if (G.hatUntil > t) return t % .5 < .25 ? 'hat1' : 'hat2';
+  if (G.mood && G.moodUntil > t) {
+    if (G.mood === 'angry') return t % .5 < .25 ? 'angry1' : 'angry2';
+    if (G.mood === 'sad') return t % .6 < .3 ? 'sad1' : 'sad2';
+  }
+  const recent = t - G.lastTapAnim < .22;
+  if (G.combo >= 100) return (t * 6 | 0) % 2 ? 'happy3' : 'happy3a';
+  if (G.combo >= 50) return (t * 6 | 0) % 2 ? 'excited1' : 'excited2';
+  if (G.pending >= 85) return 'panic1';
+  if (recent) return G.combo >= 25 ? (G.tapFrame % 2 ? 'happy1' : 'happy2') : 'tap' + (G.tapFrame + 1);
+  if (G.pending >= 60) return t % 1.2 < .6 ? 'sad1' : 'panic1';
+  const seq = ['idle1', 'idle1', 'idle1', 'idle2', 'idle1', 'idle1', 'idle3', 'phone1', 'phone1'];
+  return seq[Math.floor(t * 2.2) % seq.length];
+}
+function drawKeiko() {
+  const aw = awayBlock();
+  if (aw) { drawAwaySign(aw); return; }
+  const pose = keikoPose(), sq = G.squash > 0 ? 1 - G.squash * .5 : 1, bob = Math.sin(G.t * 3) * 1.5;
+  spr(pose, 180, SB + 14 + bob, 2.35, { sx: 2 - sq, sy: sq });
+  if (G.bubble && G.bubble.until > G.t) bubble(214, 218, G.bubble.s, 200, 'down', { size: 13 });
+}
+function drawAwaySign(b) {
+  const left = Math.ceil(b.until - G.t);
+  R(176, 330, 8, 118, '#5a2f19');
+  rr(78, 240, 204, 104, 8, '#f8f3e6', '#5a2f19', 4);
+  T('VUELVO', 180, 256, { size: 16, font: F1, align: 'center', color: COL.red });
+  T('ENSEGUIDA', 180, 280, { size: 12, font: F1, align: 'center', color: COL.red });
+  T(b.label.toLowerCase(), 180, 304, { size: 12, align: 'center', color: '#3a2a1a', weight: 600 });
+  T(left + ' s', 180, 322, { size: 12, align: 'center', color: '#3a2a1a' });
+}
+
+/* ---------- dibujo de escenas ---------- */
+let bgCache = null, titleCache = null;
+function buildCaches() {
+  const mk = () => { const c = document.createElement('canvas'); c.width = W * K; c.height = H * K; const g = c.getContext('2d'); g.setTransform(K, 0, 0, K, 0, 0); g.imageSmoothingEnabled = false; return c; };
+  bgCache = mk(); withCtx(bgCache.getContext('2d'), drawOffice);
+  titleCache = mk(); withCtx(titleCache.getContext('2d'), drawTitleBg);
+}
+function withCtx(c, fn) { const old = ctx; ctx = c; c.imageSmoothingEnabled = false; fn(); ctx = old; }
+function drawOffice() {
+  R(0, ST, W, SB - ST, '#3b1f14');
+  const im = IMG.bg_despacho; if (!im) return;
+  const s = (SB - ST) / im.height, w = im.width * s;
+  ctx.drawImage(im, Math.round((W - w) / 2), ST, Math.round(w), SB - ST);
+  // anillo de luz para el live
+  const g = ctx.createRadialGradient(180, 300, 20, 180, 300, 200); g.addColorStop(0, 'rgba(255,240,220,.18)'); g.addColorStop(1, 'rgba(255,240,220,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, ST, W, SB - ST);
+}
+function drawTitleBg() {
+  R(0, 0, W, H, '#0e1424');
+  const g = ctx.createLinearGradient(0, 0, 0, 250); g.addColorStop(0, '#26214a'); g.addColorStop(.6, '#3a5ea8'); g.addColorStop(1, '#6fb2e8');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 250);
+  for (let i = 0; i < 40; i++) R((i * 97) % W, (i * 53) % 140, 2, 2, i % 3 ? '#ffffff55' : '#ffe9a8');
+  const im = IMG.bg_palacio;
+  if (im) { const s = W / im.width; ctx.drawImage(im, 0, 150, W, Math.round(im.height * s)); }
+  const g2 = ctx.createLinearGradient(0, 380, 0, 470); g2.addColorStop(0, 'rgba(14,20,36,0)'); g2.addColorStop(1, 'rgba(14,20,36,1)');
+  ctx.fillStyle = g2; ctx.fillRect(0, 380, W, 100); R(0, 470, W, H - 470, '#0e1424');
+}
+
+// Crédito: "Desarrollado por MNRY · mantarraya.pe" (el dominio abre la web en otra pestaña)
+let creditRect = null;
+function credit(y, size) {
+  const a = 'Desarrollado por ', b = 'MNRY', c = ' · ', d = 'mantarraya.pe';
+  const wa = tw(a, size, F2, 400), wb = tw(b, size, F2, 400), wc = tw(c, size, F2, 400), wd = tw(d, size, F2, 400);
+  let x = 180 - (wa + wb + wc + wd) / 2;
+  T(a + b + c + d, 180, y, { size, align: 'center', color: COL.muted, weight: 400 }); x += wa + wb + wc;
+  creditRect = [x - 4, y - 4, wd + 8, size + 10];
+}
+function btn(r, label, kind, o = {}) {
+  const pal = { green: [COL.green, COL.green2], red: [COL.red, COL.red2], blue: [COL.blue, COL.blue2], gold: [COL.gold, COL.gold2], pink: [COL.pink, COL.pink2], gray: ['#3a4466', '#232a45'] }[kind] || [kind, '#0006'];
+  const [x, y, w, h] = r, pr = pressedUI && pressedUI.r === r ? 3 : 0;
+  ctx.globalAlpha = o.alpha ?? 1;
+  rr(x, y, w, h, 8, COL.ink); rr(x + 2, y + 2 + pr, w - 4, h - 4 - pr, 6, pal[1]); rr(x + 2, y + 2 + pr, w - 4, h - 9, 6, pal[0]);
+  R(x + 8, y + 5 + pr, w - 16, 2, 'rgba(255,255,255,.35)');
+  const dark = kind === 'gold' ? COL.ink : '#fff';
+  if (o.sub) { T(label, x + w / 2, y + h / 2 - 13 + pr, { size: o.size || 12, align: 'center', color: dark }); T(o.sub, x + w / 2, y + h / 2 + 4 + pr, { size: 11, align: 'center', color: kind === 'gold' ? '#4a3500' : '#ffffffcc', weight: 600 }); }
+  else T(label, x + w / 2, y + h / 2 - (o.size || 12) / 2 - 2 + pr, { size: o.size || 12, font: o.font || F1, align: 'center', color: dark });
+  ctx.globalAlpha = 1;
+}
+function addUI(r, fn) { ui.push({ r, fn }); }
+
+function drawHUD() {
+  R(0, 0, W, ST, COL.ink);
+  // fila 1
+  const blink = (G.t % 1) < .7;
+  rr(10, 8, 84, 22, 6, COL.red); if (blink) R(18, 16, 6, 6, '#fff'); T('EN VIVO', 30, 13, { size: 8, font: F1, color: '#fff' });
+  rr(100, 8, 82, 22, 6, COL.panel2); eye(108, 15); T(fmt(G.viewers), 124, 12, { size: 13, color: '#fff' });
+  rr(188, 8, 96, 22, 6, COL.panel2); heart(201, 19, 2, COL.pink); T(fmt(G.likes), 212, 12, { size: 13, color: '#fff' });
+  rr(290, 8, 60, 22, 6, COL.panel2); T(mmss(G.t), 320, 12, { size: 13, align: 'center', color: COL.muted });
+  // fila 2: perfil
+  ctx.save(); ctx.beginPath(); ctx.arc(32, 60, 20, 0, Math.PI * 2); ctx.fillStyle = '#ffd7e6'; ctx.fill(); ctx.clip();
+  spr('idle1', 32, 104, .95); ctx.restore();
+  ctx.beginPath(); ctx.arc(32, 60, 20, 0, Math.PI * 2); ctx.strokeStyle = COL.pink; ctx.lineWidth = 2; ctx.stroke();
+  T('@KeikoPresidenta', 60, 44, { size: 15, color: '#fff' });
+  T('Presidenta del Perú · récord ♥ ' + fmt(REC.likes), 60, 64, { size: 11, color: COL.muted, weight: 600 });
+  const sr = [270, 46, 80, 28];
+  if (!G.followed) { rr(sr[0], sr[1], sr[2], sr[3], 6, COL.pink); T('+ Seguir', sr[0] + 40, sr[1] + 7, { size: 13, align: 'center', color: '#fff' }); addUI(sr, () => { G.followed = true; G.viewers += 10; floatText('+10 ESPECTADORES', 300, 90, COL.green, 8, 'right'); SFX.good(); pushComment('sistema', '¡Gracias por seguirme!', COL.gold); }); }
+  else { rr(sr[0], sr[1], sr[2], sr[3], 6, COL.panel2); T('Siguiendo', sr[0] + 40, sr[1] + 7, { size: 13, align: 'center', color: COL.muted }); }
+}
+function drawStageOverlay() {
+  // combo
+  if (G.combo >= 2) {
+    const m = multFor(G.combo), f = 1 - (G.t - G.lastTap) / CFG.comboTimeout, x = 254, y = ST + 8;
+    rr(x, y, 96, 46, 8, 'rgba(11,15,26,.78)', m >= 4 ? COL.gold : COL.pink, 2);
+    T('COMBO', x + 10, y + 8, { size: 7, font: F1, color: COL.muted });
+    T('×' + m, x + 10, y + 20, { size: 16, font: F1, color: m >= 4 ? COL.gold : COL.pink });
+    T(String(G.combo), x + 88, y + 22, { size: 14, align: 'right', color: '#fff' });
+    R(x + 8, y + 40, 80 * clamp(f, 0, 1), 3, m >= 4 ? COL.gold : COL.pink);
+  }
+  if (G.t < 6 && G.taps < 8) { const a = .6 + .4 * Math.sin(G.t * 7); T('¡TOCA A KEIKO!', 180, 186, { size: 12, font: F1, align: 'center', color: '#fff', outline: COL.pink2, ow: 5, alpha: a }); T('rápido, para conseguir likes', 180, 206, { size: 14, align: 'center', color: '#fff', outline: COL.ink, ow: 4, alpha: a }); }
+  const b = busyBlock();
+  if (b && !b.away && b.label !== 'RESPONDIENDO A LA PRENSA') { rr(70, ST + 62, 220, 24, 6, 'rgba(11,15,26,.82)', COL.line, 2); T(b.label + ' · ' + Math.ceil(b.until - G.t) + ' s', 180, ST + 69, { size: 11, align: 'center', color: COL.gold }); }
+}
+function drawBottom() {
+  R(0, SB, W, H - SB, COL.ink);
+  R(0, SB, W, 2, COL.line);
+  // comentarios
+  const list = G.comments.slice(-5);
+  list.forEach((c, i) => {
+    const y = SB + 8 + i * 19 + (list.length < 5 ? (5 - list.length) * 19 : 0), age = G.t - c.t, a = clamp(age / .25, 0, 1) * (i === 0 && list.length === 5 ? .55 : 1);
+    ctx.globalAlpha = a;
+    R(10, y + 2, 12, 12, c.c); T(c.user[0].toUpperCase(), 16, y + 3, { size: 9, align: 'center', color: COL.ink });
+    const name = c.user + ' ';
+    T(name, 27, y + 2, { size: 12, color: c.c, weight: 600 });
+    const nw = tw(name, 12, F2, 600); let txt = c.text; const maxw = 262 - 27 - nw;
+    while (tw(txt, 12, F2, 400) > maxw && txt.length > 3) txt = txt.slice(0, -2);
+    if (txt !== c.text) txt += '…';
+    T(txt, 27 + nw, y + 2, { size: 12, color: '#fff', weight: 400 });
+    ctx.globalAlpha = 1;
+  });
+  // audiencia
+  rr(272, SB + 8, 78, 92, 8, COL.panel, COL.line, 2);
+  T('AUDIENCIA', 311, SB + 16, { size: 6, font: F1, align: 'center', color: COL.muted });
+  person(304, SB + 30, COL.cyan);
+  T(fmt(G.viewers), 311, SB + 50, { size: 16, align: 'center', color: '#fff' });
+  const up = G.trend >= 0, tc = up ? COL.green : COL.red;
+  T((up ? '▲ ' : '▼ ') + fmt(Math.abs(G.trend) / .6) + '/s', 311, SB + 72, { size: 11, align: 'center', color: tc, weight: 600 });
+  if (G.t - G.lastTap > CFG.inactivityDelay - 1.5 && G.t > 4) T('¡SE VAN!', 311, SB + 86, { size: 9, align: 'center', color: COL.red, alpha: G.t % .6 < .3 ? 1 : .3 });
+  // pendientes
+  const py = SB + 108, p = G.pending;
+  const st = p < 30 ? ['CONTROLADO', COL.green] : p < 60 ? ['COMPLICADO', COL.yellow] : p < 85 ? ['CRISIS', COL.orange] : ['COLAPSO INMINENTE', COL.red];
+  const flashing = p >= 85 && G.t % .5 < .25;
+  rr(10, py, 340, 46, 8, flashing ? '#3a1020' : COL.panel, flashing ? COL.red : COL.line, 2);
+  R(20, py + 10, 14, 18, '#f2c94c'); R(23, py + 7, 8, 4, '#8a6d1f'); R(23, py + 14, 8, 2, '#8a6d1f'); R(23, py + 19, 8, 2, '#8a6d1f');
+  T('PENDIENTES DE GOBIERNO', 42, py + 8, { size: 7, font: F1, color: COL.muted });
+  T(st[0], 42, py + 21, { size: 12, color: st[1] });
+  T(Math.floor(p) + '/100', 340, py + 18, { size: 14, align: 'right', color: '#fff' });
+  R(42, py + 37, 296, 5, '#0b0f1a'); R(42, py + 37, 296 * p / 100, 5, st[1]);
+  [30, 60, 85].forEach(v => R(42 + 296 * v / 100, py + 36, 1, 7, '#ffffff55'));
+  // fila inferior
+  const by = SB + 160;
+  if (G.ticker && G.t - G.ticker.t < 3) T(G.ticker.s, 12, by + 9, { size: 9, font: F1, color: G.t % .4 < .2 ? COL.pink : COL.gold });
+  else T('Ignoradas: ' + G.ignored + '  ·  Fase ' + (G.phase + 1) + ' de 4', 12, by + 7, { size: 13, color: COL.muted, weight: 600 });
+  const sr = [276, by, 34, 28], pr = [316, by, 34, 28];
+  rr(...sr, 6, COL.panel2, COL.line, 2); speaker(sr[0] + 9, sr[1] + 8, A.on); addUI(sr, () => { setSound(!A.on); });
+  rr(...pr, 6, COL.blue, COL.blue2, 2); R(pr[0] + 11, pr[1] + 8, 4, 12, '#fff'); R(pr[0] + 19, pr[1] + 8, 4, 12, '#fff'); addUI(pr, pauseGame);
+}
+function speaker(x, y, on) {
+  R(x, y + 4, 4, 5, '#fff'); R(x + 4, y + 2, 2, 9, '#fff'); R(x + 6, y, 2, 13, '#fff');
+  if (on) { R(x + 10, y + 3, 2, 7, '#fff'); R(x + 13, y + 1, 2, 11, '#fff'); } else { R(x + 10, y + 3, 2, 2, COL.pink); R(x + 14, y + 3, 2, 2, COL.pink); R(x + 12, y + 5, 2, 3, COL.pink); R(x + 10, y + 8, 2, 2, COL.pink); R(x + 14, y + 8, 2, 2, COL.pink); }
+}
+function drawFx() {
+  for (const h of G.hearts) heart(h.x, h.y, h.p, h.c, 1 - Math.pow(h.t / h.life, 3));
+  for (const f of G.floats) T(f.s, f.x, f.y, { size: f.size, font: F1, align: f.align, color: f.c, outline: COL.ink, ow: 4, alpha: 1 - Math.pow(f.t / f.life, 2) });
+  for (const m of G.msgs) {
+    const k = m.t < .2 ? ease(m.t / .2) : 1, a = m.t > m.life - .3 ? (m.life - m.t) / .3 : 1, s = .6 + .4 * k + (m.t < .35 ? Math.sin(m.t * 30) * .05 : 0);
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(180, 168); ctx.scale(s, s); ctx.rotate(-.04);
+    T(m.s, 0, 0, { size: 16, font: F1, align: 'center', color: m.c, outline: COL.ink, ow: 7 });
+    if (m.sub) T(m.sub, 0, 24, { size: 9, font: F1, align: 'center', color: '#fff', outline: COL.ink, ow: 5 });
+    ctx.restore();
+  }
+}
+function drawPlay() {
+  ui = [];
+  const sh = G.shake > 0 ? G.shake * 8 : 0;
+  ctx.save(); if (sh) ctx.translate(rand(-sh, sh), rand(-sh, sh));
+  ctx.save(); ctx.beginPath(); ctx.rect(0, ST, W, SB - ST); ctx.clip();
+  if (bgCache) ctx.drawImage(bgCache, 0, 0, W, H);
+  if (G.netDown) { ctx.globalAlpha = .5; }
+  drawKeiko(); ctx.globalAlpha = 1;
+  [...G.events].sort((a, b) => a.z - b.z).forEach(e => e.draw());
+  drawStageOverlay();
+  if (G.flash > 0) { ctx.globalAlpha = Math.min(.35, G.flash) * (G.t % .3 < .15 ? 1 : .4); R(0, ST, W, SB - ST, COL.red); ctx.globalAlpha = 1; }
+  ctx.restore();
+  drawHUD(); drawBottom();
+  drawFx();
+  ctx.restore();
+}
+
+/* ---------- pantalla inicial ---------- */
+const titleFx = { hearts: [], t: 0 };
+function titleUpdate(dt) {
+  titleFx.t += dt;
+  if (Math.random() < dt * 5) titleFx.hearts.push({ x: rand(110, 250), y: 430, vy: rand(-70, -40), t: 0, life: rand(1.8, 3), c: pick([COL.pink, COL.red, COL.gold]), p: 2 + (Math.random() < .4) });
+  for (const h of titleFx.hearts) { h.t += dt; h.y += h.vy * dt; h.x += Math.sin(h.t * 3 + h.life) * 20 * dt; }
+  titleFx.hearts = titleFx.hearts.filter(h => h.t < h.life);
+}
+function drawTitle() {
+  ui = [];
+  if (titleCache) ctx.drawImage(titleCache, 0, 0, W, H); else R(0, 0, W, H, '#0e1424');
+  if (scene === 'loading') { T('CARGANDO…', 180, 320, { size: 12, font: F1, align: 'center' }); R(80, 344, 200, 6, COL.panel2); R(80, 344, 200 * loaded / ASSETS.length, 6, COL.pink); return; }
+  const t = titleFx.t, bounce = Math.sin(t * 3) * 3;
+  T('MNRY PRESENTA', 180, 22, { size: 8, font: F1, align: 'center', color: '#ffffffcc', outline: COL.ink, ow: 4 });
+  T('KEIKO', 180, 48 + bounce, { size: 40, font: F1, align: 'center', color: COL.gold, outline: COL.ink, ow: 10, shadow: COL.red2, sd: 4 });
+  T('TAP TAP', 180, 98 - bounce * .6, { size: 30, font: F1, align: 'center', color: COL.pink, outline: COL.ink, ow: 9, shadow: '#5b0f2e', sd: 4 });
+  rr(24, 144, 312, 30, 6, 'rgba(11,15,26,.8)', COL.pink, 2);
+  T('¡NO ME INTERRUMPAN, ESTOY EN LIVE!', 180, 155, { size: 8, font: F1, align: 'center', color: '#fff' });
+  for (const h of titleFx.hearts) heart(h.x, h.y, h.p, h.c, 1 - h.t / h.life);
+  spr(t % 2.4 < 1.8 ? 'phone1' : 'happy2', 180, 474, 2.1);
+  const br = [56, 486, 248, 56];
+  btn(br, 'INICIAR LIVE', 'green', { size: 14 }); addUI(br, newGame);
+  T('Consigue likes. Esquiva ministros.', 180, 552, { size: 15, align: 'center', color: '#fff', weight: 600 });
+  T('Sobrevive al gobierno.', 180, 570, { size: 15, align: 'center', color: '#fff', weight: 600 });
+  const rec = REC.likes ? 'RÉCORD ♥ ' + fmt(REC.likes) + '  ·  ' + fmt(REC.aud) + ' esp.  ·  ' + mmss(REC.time) : 'Toca a Keiko lo más rápido que puedas';
+  T(rec, 180, 588, { size: 12, align: 'center', color: COL.gold });
+  credit(616, 9);
+  const sr = [314, 10, 36, 30]; rr(...sr, 6, 'rgba(11,15,26,.7)', COL.line, 2); speaker(sr[0] + 10, sr[1] + 9, A.on); addUI(sr, () => setSound(!A.on));
+}
+
+/* ---------- pausa ---------- */
+function pauseGame() { if (scene !== 'play') return; setScene('pause'); MUSIC.stop(); }
+function resumeGame() { setScene('play'); MUSIC.start(); }
+function drawPause() {
+  drawPlay(); ui = [];
+  R(0, 0, W, H, 'rgba(5,7,13,.78)');
+  rr(40, 170, 280, 290, 10, COL.panel, COL.line, 2);
+  T('PAUSA', 180, 196, { size: 20, font: F1, align: 'center', color: COL.gold });
+  T('El país también espera.', 180, 228, { size: 14, align: 'center', color: COL.muted, weight: 600 });
+  const a = [70, 262, 220, 50], b = [70, 324, 220, 44], c = [70, 380, 220, 44];
+  btn(a, 'CONTINUAR', 'green', { size: 12 }); addUI(a, resumeGame);
+  btn(b, A.on ? 'SONIDO: SÍ' : 'SONIDO: NO', 'gray', { size: 10 }); addUI(b, () => setSound(!A.on));
+  btn(c, 'SALIR AL INICIO', 'red', { size: 10 }); addUI(c, () => { G = null; setScene('title'); });
+  credit(438, 9);
+}
+
+/* ---------- game over ---------- */
+const OVER_WINDOWS = [['CONGRESO LLAMANDO…', '#2c3554'], ['DECRETOS PENDIENTES', '#5a4a1a'], ['¡EMERGENCIA NACIONAL!', COL.red2], ['MANIFESTACIONES', COL.red2], ['CRISIS EN EL GABINETE', '#2c3554'], ['RUEDA DE PRENSA', COL.pink2], ['CONEXIÓN INESTABLE', '#1c3a52'], ['MINISTRO EN ESPERA', '#2c3554']];
+function drawOver() {
+  ui = [];
+  const t = G.overT, gov = G.ending === 'gov';
+  const sh = G.shake > 0 ? G.shake * 7 : 0;
+  ctx.save(); if (sh) ctx.translate(rand(-sh, sh), rand(-sh, sh));
+  ctx.save(); ctx.beginPath(); ctx.rect(0, ST, W, SB - ST); ctx.clip();
+  if (bgCache) ctx.drawImage(bgCache, 0, 0, W, H);
+  if (gov) {
+    const n = Math.min(OVER_WINDOWS.length * 2, Math.floor(t / .09));
+    for (let i = 0; i < n; i++) {
+      const [ti, c] = OVER_WINDOWS[i % OVER_WINDOWS.length], x = 10 + ((i * 71) % 190), y = ST + 10 + ((i * 47) % 210);
+      rr(x + 3, y + 4, 150, 84, 6, '#0008'); rr(x, y, 150, 84, 6, COL.panel, COL.line, 2); rr(x, y, 150, 18, [6, 6, 0, 0], c);
+      T(ti, x + 6, y + 5, { size: 6, font: F1, color: '#fff' }); R(x + 10, y + 30, 100, 4, COL.line); R(x + 10, y + 42, 120, 4, COL.line); R(x + 10, y + 54, 70, 4, COL.line);
+    }
+  } else { R(0, ST, W, SB - ST, 'rgba(5,7,13,.45)'); }
+  drawKeiko();
+  for (const h of G.hearts) heart(h.x, h.y, h.p, h.c, 1 - h.t / h.life);
+  if (gov && Math.random() < .5) G.hearts.push({ x: rand(110, 250), y: 400, vx: rand(-30, 30), vy: rand(-140, -80), p: 3, c: pick([COL.pink, COL.gold, COL.red]), t: 0, life: 1.4, ph: 0 });
+  ctx.restore();
+  // título
+  R(0, 0, W, ST, COL.ink);
+  const k = ease(t / .4);
+  ctx.save(); ctx.globalAlpha = k;
+  T(gov ? 'SE CAYÓ' : 'SE ACABÓ', 180, 14, { size: 22, font: F1, align: 'center', color: COL.red, outline: '#000', ow: 6 });
+  T(gov ? 'EL GOBIERNO' : 'EL LIVE', 180, 42, { size: 22, font: F1, align: 'center', color: COL.red, outline: '#000', ow: 6 });
+  T(gov ? '¡PERO EL LIVE FUE UN ÉXITO!' : '¡Y TODAVÍA QUEDA TODO POR GOBERNAR!', 180, 74, { size: gov ? 9 : 7, font: F1, align: 'center', color: COL.gold });
+  ctx.restore();
+  // panel de resultados
+  const pk = ease((t - .9) / .45), py = SB - 92 + (1 - pk) * 300;
+  if (t > .9) {
+    R(0, py, W, H - py, COL.ink); R(0, py, W, 2, COL.line);
+    if (G.newRecord) { rr(96, py - 16, 168, 26, 6, COL.gold, COL.ink, 2); T('¡NUEVO RÉCORD!', 180, py - 8, { size: 9, font: F1, align: 'center', color: COL.ink }); }
+    const rows = [['Likes conseguidos', full(G.likes), COL.pink], ['Máximo de espectadores', full(G.maxViewers), '#fff'], ['Tiempo de transmisión', mmss(G.t), '#fff'], ['Interrupciones ignoradas', String(G.ignored), COL.orange], ['Récord personal', full(REC.likes), COL.gold]];
+    rows.forEach((r, i) => { const y = py + 20 + i * 27; T(r[0], 24, y, { size: 15, color: COL.muted, weight: 600 }); T(r[1], 336, y, { size: 17, align: 'right', color: r[2] }); if (i < 4) R(24, y + 22, 312, 1, '#ffffff14'); });
+    const a = [20, py + 160, 320, 48], b = [20, py + 216, 200, 40], c = [228, py + 216, 112, 40];
+    if (t > 1.5) {
+      btn(a, 'VOLVER A HACER LIVE', 'green', { size: 12 }); addUI(a, newGame);
+      btn(b, 'COMPARTIR', 'pink', { size: 11 }); addUI(b, openShare);
+      btn(c, 'INICIO', 'gray', { size: 10 }); addUI(c, () => { G = null; setScene('title'); });
+      credit(py + 266, 9);
+    }
+  }
+  ctx.restore();
+}
+
+/* ---------- compartir ---------- */
+function shareUrl() { if (CFG.shareUrl) return CFG.shareUrl; try { const u = location.origin + location.pathname; return /^https?:/.test(u) && !/claude|anthropic|localhost|127\./.test(u) ? u : ''; } catch (e) { return ''; } }
+function shareText() {
+  const u = shareUrl(), gov = G.ending === 'gov';
+  return 'Conseguí ' + full(G.likes) + ' likes en KEIKO TAP TAP y ' + (gov ? 'se cayó el gobierno 💥' : 'se acabó el live 📉') + ' en ' + mmss(G.t) + '. ¿Me superas?' + (u ? ' ' + u : '');
+}
+function buildCard() {
+  const c = document.createElement('canvas'); c.width = 720; c.height = 1280; const g = c.getContext('2d'); g.setTransform(2, 0, 0, 2, 0, 0);
+  withCtx(g, () => {
+    const gov = G.ending === 'gov';
+    R(0, 0, W, H, '#0b0f1a');
+    if (bgCache) ctx.drawImage(bgCache, 0, 0, bgCache.width, bgCache.height, 0, 0, W, H);
+    R(0, 0, W, ST + 4, '#0b0f1a');
+    T('KEIKO TAP TAP', 180, 22, { size: 20, font: F1, align: 'center', color: COL.gold, outline: COL.ink, ow: 6, shadow: COL.red2, sd: 3 });
+    T('¡NO ME INTERRUMPAN, ESTOY EN LIVE!', 180, 56, { size: 7, font: F1, align: 'center', color: '#fff' });
+    ctx.save(); ctx.beginPath(); ctx.rect(0, ST, W, SB - ST); ctx.clip();
+    spr(gov ? 'gameover1' : 'sad2', 180, SB + 14, 2.35);
+    ctx.restore();
+    rr(16, 120, 328, 64, 8, 'rgba(11,15,26,.85)', COL.red, 2);
+    T(gov ? 'SE CAYÓ EL GOBIERNO' : 'SE ACABÓ EL LIVE', 180, 134, { size: 13, font: F1, align: 'center', color: COL.red });
+    T(gov ? '¡PERO EL LIVE FUE UN ÉXITO!' : '¡Y QUEDA TODO POR GOBERNAR!', 180, 160, { size: 8, font: F1, align: 'center', color: COL.gold });
+    R(0, SB, W, H - SB, '#0b0f1a'); R(0, SB, W, 2, COL.line);
+    heart(52, SB + 46, 4, COL.pink);
+    T(full(G.likes), 80, SB + 30, { size: 26, font: F1, color: '#fff' });
+    T('LIKES', 82, SB + 64, { size: 8, font: F1, color: COL.pink });
+    const rows = [['Máx. espectadores', full(G.maxViewers)], ['Tiempo en vivo', mmss(G.t)], ['Interrupciones ignoradas', String(G.ignored)]];
+    rows.forEach((r, i) => { T(r[0], 24, SB + 92 + i * 22, { size: 14, color: COL.muted, weight: 600 }); T(r[1], 336, SB + 92 + i * 22, { size: 14, align: 'right', color: '#fff' }); });
+    rr(24, H - 62, 312, 34, 8, COL.pink);
+    T('¿ME SUPERAS?', 180, H - 51, { size: 11, font: F1, align: 'center', color: '#fff' });
+    T('Desarrollado por MNRY · mantarraya.pe', 180, H - 20, { size: 9, align: 'center', color: COL.muted, weight: 400 });
+  });
+  return c;
+}
+const shareEl = document.getElementById('share');
+let cardBlob = null;
+function openShare() {
+  const c = buildCard();
+  document.getElementById('shImg').src = c.toDataURL('image/png');
+  cardBlob = null; try { c.toBlob(b => { cardBlob = b; }, 'image/png'); } catch (e) {}
+  const txt = shareText();
+  document.getElementById('shTxt').value = txt;
+  document.getElementById('shWa').href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+  document.getElementById('shNat').hidden = !navigator.share;
+  shareEl.hidden = false;
+}
+document.getElementById('shCl').onclick = () => { shareEl.hidden = true; };
+document.getElementById('shCp').onclick = async () => {
+  const ta = document.getElementById('shTxt'), b = document.getElementById('shCp');
+  try { await navigator.clipboard.writeText(ta.value); b.textContent = 'Copiado'; } catch (e) { ta.focus(); ta.select(); b.textContent = 'Selecciónalo y copia'; }
+  setTimeout(() => { b.textContent = 'Copiar texto'; }, 1800);
+};
+document.getElementById('shNat').onclick = async () => {
+  const txt = document.getElementById('shTxt').value;
+  try {
+    const file = cardBlob ? new File([cardBlob], 'keiko-tap-tap.png', { type: 'image/png' }) : null;
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text: txt });
+    else await navigator.share({ text: txt });
+  } catch (e) { /* el usuario canceló o el navegador no lo permite */ }
+};
+
+/* ---------- entrada ---------- */
+const caps = new Map();
+function pt(e) { const r = cv.getBoundingClientRect(); return { id: e.pointerId, x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+cv.addEventListener('pointerdown', e => {
+  e.preventDefault(); unlockAudio(); cv.focus({ preventScroll: true });
+  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  const p = pt(e);
+  for (let i = ui.length - 1; i >= 0; i--) if (inR(p.x, p.y, ui[i].r)) { pressedUI = ui[i]; caps.set(p.id, { up: q => { if (pressedUI && inR(q.x, q.y, pressedUI.r)) { const f = pressedUI.fn; pressedUI = null; SFX.click(); f(); } pressedUI = null; } }); return; }
+  if (scene !== 'play') return;
+  const evs = [...G.events].sort((a, b) => b.z - a.z);
+  for (const ev of evs) if (ev.hit(p.x, p.y)) { if (ev.down(p) !== false) { caps.set(p.id, ev); return; } }
+  if (p.y >= ST && p.y <= SB) doTap(p.x, p.y);
+}, { passive: false });
+cv.addEventListener('pointermove', e => { const h = caps.get(e.pointerId); if (h && h.move) h.move(pt(e)); });
+function endPointer(e) { const h = caps.get(e.pointerId); caps.delete(e.pointerId); if (h && h.up) h.up(pt(e)); unlockAudio(); }
+cv.addEventListener('pointerup', endPointer);
+cv.addEventListener('pointercancel', endPointer);
+cv.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (scene === 'play') pauseGame(); else if (scene === 'pause') resumeGame(); else if (!shareEl.hidden) shareEl.hidden = true; }
+  if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && shareEl.hidden) {
+    e.preventDefault(); unlockAudio();
+    if (scene === 'play') doTap(180 + rand(-40, 40), 330 + rand(-30, 30));
+    else if (scene === 'title') newGame();
+    else if (scene === 'pause') resumeGame();
+    else if (scene === 'over' && G.overT > 1.5) newGame();
+  }
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
+
+/* ---------- bucle ---------- */
+function resize() {
+  const wrapEl = document.getElementById('wrap'), cs = getComputedStyle(wrapEl);
+  const aw = wrapEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const ah = wrapEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const s = Math.max(.3, Math.min(aw / W, ah / H));
+  cv.style.width = Math.floor(W * s) + 'px'; cv.style.height = Math.floor(H * s) + 'px';
+  K = Math.max(1, Math.min(3, Math.ceil(s * (window.devicePixelRatio || 1))));
+  cv.width = W * K; cv.height = H * K; ctx.setTransform(K, 0, 0, K, 0, 0); ctx.imageSmoothingEnabled = false;
+  if (loaded >= ASSETS.length) buildCaches();
+}
+window.addEventListener('resize', resize);
+const creditEl = document.getElementById('credit');
+function placeCredit() {
+  const show = creditRect && (scene === 'title' || scene === 'pause' || (scene === 'over' && G && G.overT > 1.5)) && shareEl.hidden;
+  if (!show) { if (!creditEl.hidden) creditEl.hidden = true; creditRect = null; return; }
+  const r = cv.getBoundingClientRect(), k = r.width / W;
+  Object.assign(creditEl.style, { left: r.left + creditRect[0] * k + 'px', top: r.top + creditRect[1] * k + 'px', width: creditRect[2] * k + 'px', height: creditRect[3] * k + 'px' });
+  creditEl.hidden = false; creditRect = null;
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  update(dt);
+  ctx.setTransform(K, 0, 0, K, 0, 0); ctx.imageSmoothingEnabled = false;
+  if (scene === 'title' || scene === 'loading') drawTitle();
+  else if (scene === 'play') drawPlay();
+  else if (scene === 'pause') drawPause();
+  else if (scene === 'over') drawOver();
+  placeCredit();
+  requestAnimationFrame(frame);
+}
+resize();
+requestAnimationFrame(frame);
+const fontsReady = (document.fonts && document.fonts.load) ? Promise.race([Promise.all([document.fonts.load('16px "Press Start 2P"'), document.fonts.load('700 16px "Pixelify Sans"'), document.fonts.load('400 16px "Pixelify Sans"'), document.fonts.load('600 16px "Pixelify Sans"')]), new Promise(r => setTimeout(r, 2500))]) : Promise.resolve();
+Promise.all([loadAssets(), fontsReady]).then(() => { buildCaches(); setScene('title'); });
+window.__ktt = { get G() { return G; }, get scene() { return scene; }, newGame, CFG, spawn: id => G && G.events.push(new EVENTS[id]()), end: endGame };
+</script>
+</body>
+</html>

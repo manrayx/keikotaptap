@@ -117,6 +117,7 @@ body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-c
   "audienceFailMin": 15,
   "firstEvent": 5,
   "inputLock": 0.35,
+  "supportAutoOpen": 4.5,
   "escalation": {"start": 75, "pendingAccel": 0.03, "intervalShrink": 0.012, "minIntervalScale": 0.5},
   "phases": [
     {"name":"EL LIVE TRANQUILO","start":0,"interval":[10,12],"max":1,"autoPending":0.2,
@@ -788,7 +789,12 @@ function spawnEvent() {
 function update(dt) {
   sceneT += dt;
   if (scene === 'title' || scene === 'loading') { titleUpdate(dt); return; }
-  if (scene === 'over') { G.overT += dt; updateFx(dt); return; }
+  if (scene === 'over') {
+    G.overT += dt; updateFx(dt);
+    // si el jugador no toca nada 3 s después de ver los resultados, se abre la ventana de Yape (una vez por partida)
+    if (!G.supAuto && !G.overTouched && G.overT > CFG.supportAutoOpen && shareEl.hidden) { G.supAuto = true; openSupport(); }
+    return;
+  }
   if (scene !== 'play') return;
   G.t += dt;
   const p = phaseOf(G.t);
@@ -912,7 +918,16 @@ function ghostBtn(r, l1, l2, c, icon) {
   if (icon === 'heart') heart(x + 16, y + h / 2 + pr, 2, c);
   else { ctx.fillStyle = c; ctx.beginPath(); const cx = x + 16, cy = y + h / 2 + pr; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 ? 3 : 7; ctx.lineTo(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad); } ctx.fill(); }
   T(l1, x + 30, y + 6 + pr, { size: 7, font: F1, color: c });
-  T(l2, x + 30, y + 18 + pr, { size: 11, color: '#fff', weight: 600 });
+  T(l2, x + 30, y + 18 + pr, { size: 7, font: F1, color: c });
+}
+// Botón de Yape: sólido, dorado y con un latido suave para que no se pierda
+function yapeBtn(r) {
+  const [x, y, w, h] = r, pr = pressedUI && pressedUI.r === r ? 2 : 0, beat = (Math.sin(sceneT * 5) + 1) / 2;
+  ctx.globalAlpha = .25 + .35 * beat; rr(x - 3, y - 3, w + 6, h + 6, 9, null, COL.gold, 3); ctx.globalAlpha = 1;
+  rr(x, y + pr, w, h, 7, COL.ink); rr(x + 2, y + 2 + pr, w - 4, h - 4, 6, COL.gold2); rr(x + 2, y + 2 + pr, w - 4, h - 8, 6, COL.gold);
+  heart(x + 17, y + h / 2 + pr - 1, 2 + (beat > .7 ? 1 : 0), COL.red);
+  T('APOYA EL LIVE', x + 32, y + 7 + pr, { size: 7, font: F1, color: COL.ink });
+  T('con tu Yape', x + 32, y + 18 + pr, { size: 12, color: COL.ink, weight: 700 });
 }
 // Monetización: datos editables
 const SUPPORT = { qr: 'assets/yape-qr.png' };
@@ -1155,7 +1170,7 @@ function drawOver() {
       btn(a, 'VOLVER A HACER LIVE', 'green', { size: 12 }); addUI(a, newGame);
       btn(b, 'COMPARTIR', 'pink', { size: 11 }); addUI(b, openShare);
       btn(c, 'INICIO', 'gray', { size: 10 }); addUI(c, () => { G = null; setScene('title'); });
-      ghostBtn(d, 'APOYA EL LIVE', 'con tu Yape', COL.gold, 'heart'); addUI(d, openSupport);
+      yapeBtn(d); addUI(d, openSupport);
       ghostBtn(e, '¿UN JUEGO PARA', 'TU MARCA? · MNRY', COL.cyan, 'star'); addUI(e, openMNRY);
       credit(py + 266, 9);
     }
@@ -1231,6 +1246,7 @@ document.getElementById('shNat').onclick = async () => {
 const caps = new Map();
 function pt(e) { const r = cv.getBoundingClientRect(); return { id: e.pointerId, x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
 cv.addEventListener('pointerdown', e => {
+  if (scene === 'over' && G) G.overTouched = true;
   e.preventDefault(); unlockAudio(); cv.focus({ preventScroll: true });
   try { cv.setPointerCapture(e.pointerId); } catch (err) {}
   const p = pt(e);
@@ -1247,6 +1263,7 @@ cv.addEventListener('pointercancel', endPointer);
 cv.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('gesturestart', e => e.preventDefault());
 window.addEventListener('keydown', e => {
+  if (scene === 'over' && G) G.overTouched = true;
   if (e.key === 'Escape') { if (scene === 'play') pauseGame(); else if (scene === 'pause') resumeGame(); else if (!shareEl.hidden) shareEl.hidden = true; }
   if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && shareEl.hidden) {
     e.preventDefault(); unlockAudio();

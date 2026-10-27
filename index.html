@@ -43,6 +43,20 @@ body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-c
   background:radial-gradient(ellipse at 50% 30%,#1a2140 0%,#0b0f1a 70%)}
 #c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;outline:none;box-shadow:0 0 0 2px #232a45,0 20px 60px #000a}
 #credit{position:fixed;z-index:5;display:block}
+#support{position:fixed;inset:0;z-index:21;display:flex;align-items:center;justify-content:center;background:#05070dcc;padding:16px;box-sizing:border-box}
+#support .card{background:var(--panel);border:2px solid var(--gold);border-radius:10px;padding:16px;max-width:320px;width:100%;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
+#support h2{font-family:var(--f-display);font-size:12px;margin:0;color:var(--gold)}
+#support .lead{margin:0;font-size:15px;color:var(--fg);text-wrap:balance}
+#support .qr{width:180px;height:180px;border-radius:8px;background:#fff;image-rendering:auto}
+#support .qr.ph{display:flex;align-items:center;justify-content:center;color:#742284;font-weight:700;border:3px dashed #742284;box-sizing:border-box}
+#support .hint{margin:0;font-size:13px;color:var(--muted);text-wrap:balance}#support .hint b{color:var(--fg)}
+#support .qr{cursor:pointer}
+#support .op{flex:1;font-family:var(--f-ui);font-weight:700;font-size:15px;border-radius:6px;padding:11px 8px;color:#fff;text-align:center;text-decoration:none;background:#10b5a0;border-bottom:4px solid #0006}
+#support .wide{width:100%;flex:none}
+#support .qr{-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+#support .row{display:flex;gap:8px;width:100%}
+#support button{flex:1;font-family:var(--f-ui);font-weight:700;font-size:15px;border:0;border-radius:6px;padding:11px 8px;color:#fff;cursor:pointer;border-bottom:4px solid #0006}
+#support .cp{background:#742284}#support .cl{background:#3a4466}
 #share{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#05070dcc;padding:16px;box-sizing:border-box}
 #share .card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:14px;max-width:340px;width:100%;display:flex;flex-direction:column;gap:10px;align-items:stretch}
 #share h2{font-family:var(--f-display);font-size:12px;margin:0;color:var(--gold);text-align:center;letter-spacing:.04em}
@@ -58,6 +72,19 @@ body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-c
 <body>
 <div id="wrap"><canvas id="c" width="360" height="640" tabindex="0" aria-label="Keiko Tap Tap, videojuego"></canvas></div>
 <a id="credit" href="https://mantarraya.pe" target="_blank" rel="noopener" aria-label="mantarraya.pe" hidden></a>
+<div id="support" class="ov" hidden>
+  <div class="card" role="dialog" aria-label="Apoya el live">
+    <h2>♥ APOYA EL LIVE ♥</h2>
+    <p class="lead">Tu yapeo es el auspicio que necesitamos para seguir haciendo juegos como este.</p>
+    <img id="supQr" alt="Código QR para yapear. Tócalo para guardarlo." class="qr" role="button" tabindex="0">
+    <div id="supQrPh" class="qr ph" hidden>QR de Yape</div>
+    <p class="hint" id="supHint">Toca el QR para guardarlo. Luego, en Yape, elige <b>Escanear</b> y sube la imagen desde tu galería.</p>
+    <div class="row">
+      <button id="supSave" class="cp" type="button">Guardar QR</button>
+    </div>
+    <button id="supCl" class="cl wide" type="button">Cerrar</button>
+  </div>
+</div>
 <div id="share" hidden>
   <div class="card" role="dialog" aria-label="Compartir resultado">
     <h2>COMPARTIR RESULTADO</h2>
@@ -878,6 +905,38 @@ function drawTitleBg() {
   ctx.fillStyle = g2; ctx.fillRect(0, 380, W, 100); R(0, 470, W, H - 470, '#0e1424');
 }
 
+// Botones secundarios de apoyo (contorno, más discretos que los principales)
+function ghostBtn(r, l1, l2, c, icon) {
+  const [x, y, w, h] = r, pr = pressedUI && pressedUI.r === r ? 2 : 0;
+  rr(x, y + pr, w, h, 7, 'rgba(255,255,255,.04)', c, 2);
+  if (icon === 'heart') heart(x + 16, y + h / 2 + pr, 2, c);
+  else { ctx.fillStyle = c; ctx.beginPath(); const cx = x + 16, cy = y + h / 2 + pr; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 ? 3 : 7; ctx.lineTo(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad); } ctx.fill(); }
+  T(l1, x + 30, y + 6 + pr, { size: 7, font: F1, color: c });
+  T(l2, x + 30, y + 18 + pr, { size: 11, color: '#fff', weight: 600 });
+}
+// Monetización: datos editables
+const SUPPORT = { qr: 'assets/yape-qr.png' };
+const MNRY_URL = 'https://mantarraya.pe';
+function openSupport() {
+  const qr = document.getElementById('supQr'); qr.hidden = false; qr.onerror = () => { qr.hidden = true; document.getElementById('supQrPh').hidden = false; }; qr.src = SUPPORT.qr;
+  document.getElementById('support').hidden = false;
+}
+async function saveQR() {
+  const btn = document.getElementById('supSave');
+  try {
+    const blob = await (await fetch(SUPPORT.qr)).blob();
+    const file = new File([blob], 'yape-keikotaptap.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      await navigator.share({ files: [file] });   // en el celular abre "Guardar imagen"
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'yape-keikotaptap.png';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+    btn.textContent = '¡Listo!';
+  } catch (e) { btn.textContent = 'Toma una captura'; }
+  setTimeout(() => { btn.textContent = 'Guardar QR'; }, 2200);
+}
+function openMNRY() { try { window.open(MNRY_URL, '_blank', 'noopener'); } catch (e) {} }
 // Crédito: "Desarrollado por MNRY · mantarraya.pe" (el dominio abre la web en otra pestaña)
 let creditRect = null;
 function credit(y, size) {
@@ -1089,12 +1148,15 @@ function drawOver() {
     R(0, py, W, H - py, COL.ink); R(0, py, W, 2, COL.line);
     if (G.newRecord) { rr(96, py - 16, 168, 26, 6, COL.gold, COL.ink, 2); T('¡NUEVO RÉCORD!', 180, py - 8, { size: 9, font: F1, align: 'center', color: COL.ink }); }
     const rows = [['Likes conseguidos', full(G.likes), COL.pink], ['Máximo de espectadores', full(G.maxViewers), '#fff'], ['Tiempo de transmisión', mmss(G.t), '#fff'], ['Interrupciones ignoradas', String(G.ignored), COL.orange], ['Récord personal', full(REC.likes), COL.gold]];
-    rows.forEach((r, i) => { const y = py + 20 + i * 27; T(r[0], 24, y, { size: 15, color: COL.muted, weight: 600 }); T(r[1], 336, y, { size: 17, align: 'right', color: r[2] }); if (i < 4) R(24, y + 22, 312, 1, '#ffffff14'); });
-    const a = [20, py + 160, 320, 48], b = [20, py + 216, 200, 40], c = [228, py + 216, 112, 40];
+    rows.forEach((r, i) => { const y = py + 14 + i * 23; T(r[0], 24, y, { size: 14, color: COL.muted, weight: 600 }); T(r[1], 336, y, { size: 15, align: 'right', color: r[2] }); if (i < 4) R(24, y + 19, 312, 1, '#ffffff14'); });
+    const a = [20, py + 130, 320, 44], b = [20, py + 180, 200, 36], c = [228, py + 180, 112, 36];
+    const d = [20, py + 224, 154, 34], e = [180, py + 224, 160, 34];
     if (t > 1.5) {
       btn(a, 'VOLVER A HACER LIVE', 'green', { size: 12 }); addUI(a, newGame);
       btn(b, 'COMPARTIR', 'pink', { size: 11 }); addUI(b, openShare);
       btn(c, 'INICIO', 'gray', { size: 10 }); addUI(c, () => { G = null; setScene('title'); });
+      ghostBtn(d, 'APOYA EL LIVE', 'con tu Yape', COL.gold, 'heart'); addUI(d, openSupport);
+      ghostBtn(e, '¿UN JUEGO PARA', 'TU MARCA? · MNRY', COL.cyan, 'star'); addUI(e, openMNRY);
       credit(py + 266, 9);
     }
   }
@@ -1146,6 +1208,10 @@ function openShare() {
   document.getElementById('shNat').hidden = !navigator.share;
   shareEl.hidden = false;
 }
+document.getElementById('supSave').onclick = saveQR;
+document.getElementById('supQr').onclick = saveQR;
+document.getElementById('supQr').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); saveQR(); } };
+document.getElementById('supCl').onclick = () => { document.getElementById('support').hidden = true; };
 document.getElementById('shCl').onclick = () => { shareEl.hidden = true; };
 document.getElementById('shCp').onclick = async () => {
   const ta = document.getElementById('shTxt'), b = document.getElementById('shCp');
@@ -1206,7 +1272,7 @@ function resize() {
 window.addEventListener('resize', resize);
 const creditEl = document.getElementById('credit');
 function placeCredit() {
-  const show = creditRect && (scene === 'title' || scene === 'pause' || (scene === 'over' && G && G.overT > 1.5)) && shareEl.hidden;
+  const show = creditRect && (scene === 'title' || scene === 'pause' || (scene === 'over' && G && G.overT > 1.5)) && shareEl.hidden && document.getElementById('support').hidden;
   if (!show) { if (!creditEl.hidden) creditEl.hidden = true; creditRect = null; return; }
   const r = cv.getBoundingClientRect(), k = r.width / W;
   Object.assign(creditEl.style, { left: r.left + creditRect[0] * k + 'px', top: r.top + creditRect[1] * k + 'px', width: creditRect[2] * k + 'px', height: creditRect[3] * k + 'px' });

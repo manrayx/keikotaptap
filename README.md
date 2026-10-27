@@ -8,7 +8,7 @@ Videojuego web de sátira política en 8 bits. HTML5 + Canvas + Web Audio, sin b
 |---|---|
 | `index.html` | El juego completo (código, reglas y audio en un solo archivo). |
 | `assets/` | Sprites recortados de tu hoja, fondos y fuentes pixeladas (licencia OFL, incluidas). |
-| `og.png` | Imagen de vista previa para WhatsApp, Facebook y X (1200 × 630). |
+| `og.jpg` | Imagen de vista previa para WhatsApp, Facebook y X (1200 × 630). |
 | `herramientas/extract.py` | Vuelve a recortar los sprites si cambias la hoja (`sheet.png`). |
 | `herramientas/sim.js` | Simulador de balance: juega cientos de partidas con bots. |
 
@@ -20,7 +20,7 @@ Videojuego web de sátira política en 8 bits. HTML5 + Canvas + Web Audio, sin b
    - Publish directory: `.`
 3. Cuando tengas la URL final (por ejemplo `https://keikotaptap.onrender.com`), edita dos cosas en `index.html`:
    - En el bloque `<script type="application/json" id="cfg">`, pon la URL en `"shareUrl"`. Así el botón COMPARTIR incluye el enlace.
-   - En `<meta property="og:image" content="og.png">`, cambia `og.png` por la URL completa (`https://…/og.png`). WhatsApp necesita la URL absoluta para mostrar la imagen.
+   - En `<meta property="og:image" content="og.png">`, cambia `og.jpg` por la URL completa (`https://…/og.png`). WhatsApp necesita la URL absoluta para mostrar la imagen.
 
 También funciona en GitHub Pages, Netlify o cualquier hosting estático.
 

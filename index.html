@@ -18,6 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
+<script data-goatcounter="https://manrayx.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Keiko Tap Tap</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,6 +150,8 @@ body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-c
    Sátira política. Obra ficticia. Arte de personajes: MNRY.
    ========================================================================= */
 const CFG = JSON.parse(document.getElementById('cfg').textContent);
+// Estadísticas anónimas (GoatCounter: sin cookies ni datos personales)
+function track(name) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} }
 const W = 360, H = 640, ST = 96, SB = 448;           // pantalla lógica y límites del escenario
 const F1 = '"Press Start 2P", ui-monospace, monospace';
 const F2 = '"Pixelify Sans", system-ui, sans-serif';
@@ -342,6 +345,7 @@ const USERS = ['tia_rosa', 'lucho_87', 'chabuca.pe', 'el_cholo_tech', 'mari_huan
 const UCOL = ['#ff8fb1', '#7dd3fc', '#fcd34d', '#86efac', '#c4b5fd', '#fdba74', '#f9a8d4', '#a5f3fc'];
 
 function newGame() {
+  track('partida-iniciada');
   G = {
     t: 0, likes: 0, viewers: CFG.viewers0, maxViewers: CFG.viewers0, pending: CFG.pending0,
     combo: 0, lastTap: -99, bonusHit: {}, likeAcc: 0, taps: 0,
@@ -420,6 +424,7 @@ function doTap(x, y) {
 
 function endGame(type) {
   if (G.ending) return;
+  track(type === 'gov' ? 'fin-se-cayo-el-gobierno' : 'fin-se-acabo-el-live');
   G.ending = type; G.overT = 0; G.bubble = null; G.events = [];
   G.newRecord = G.likes > REC.likes;
   REC.likes = Math.max(REC.likes, G.likes); REC.aud = Math.max(REC.aud, Math.floor(G.maxViewers)); REC.time = Math.max(REC.time, Math.floor(G.t));
@@ -933,10 +938,12 @@ function yapeBtn(r) {
 const SUPPORT = { qr: 'assets/yape-qr.png' };
 const MNRY_URL = 'https://mantarraya.pe';
 function openSupport() {
+  track(G && G.overTouched ? 'yape-abierto-boton' : 'yape-abierto-auto');
   const qr = document.getElementById('supQr'); qr.hidden = false; qr.onerror = () => { qr.hidden = true; document.getElementById('supQrPh').hidden = false; }; qr.src = SUPPORT.qr;
   document.getElementById('support').hidden = false;
 }
 async function saveQR() {
+  track('yape-qr-guardado');
   const btn = document.getElementById('supSave');
   try {
     const blob = await (await fetch(SUPPORT.qr)).blob();
@@ -951,7 +958,7 @@ async function saveQR() {
   } catch (e) { btn.textContent = 'Toma una captura'; }
   setTimeout(() => { btn.textContent = 'Guardar QR'; }, 2200);
 }
-function openMNRY() { try { window.open(MNRY_URL, '_blank', 'noopener'); } catch (e) {} }
+function openMNRY() { track('mnry-juego-para-tu-marca'); try { window.open(MNRY_URL, '_blank', 'noopener'); } catch (e) {} }
 // Crédito: "Desarrollado por MNRY · mantarraya.pe" (el dominio abre la web en otra pestaña)
 let creditRect = null;
 function credit(y, size) {
@@ -1214,6 +1221,7 @@ function buildCard() {
 const shareEl = document.getElementById('share');
 let cardBlob = null;
 function openShare() {
+  track('compartir');
   const c = buildCard();
   document.getElementById('shImg').src = c.toDataURL('image/png');
   cardBlob = null; try { c.toBlob(b => { cardBlob = b; }, 'image/png'); } catch (e) {}

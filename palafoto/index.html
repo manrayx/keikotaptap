@@ -145,7 +145,7 @@ const HEART = ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...']
 function heart(x, y, p, c, a = 1) { const key = c + p; let s = heartCache[key]; if (!s) { s = document.createElement('canvas'); s.width = 7 * p; s.height = 6 * p; const g = s.getContext('2d'); HEART.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === 'X') { g.fillStyle = c; g.fillRect(i * p, j * p, p, p); } })); g.fillStyle = 'rgba(255,255,255,.75)'; g.fillRect(p, p, p, p); heartCache[key] = s; } ctx.globalAlpha = a; ctx.drawImage(s, Math.round(x - 3.5 * p), Math.round(y - 3 * p)); ctx.globalAlpha = 1; }
 
 /* ---------- recursos (arte de MNRY recortado de la hoja) ---------- */
-const ASSET_V = 4, IMG = {};
+const ASSET_V = 5, IMG = {};
 const ASSETS = ['t_logo', 't_cover', 't_photo', 'x_b_cheer0','x_c_check','x_c_cut','x_c_done','x_c_fake','x_c_model','x_c_sign','x_c_unfinished','x_c_warn','x_flash0','x_flash1','x_flash2','x_fx_burst1','x_fx_gold1','x_fx_smoke0','x_h_beam','x_h_down','x_h_dust','x_h_fly','x_h_sheet0','x_h_sheet1','x_h_up','x_h_wind0','x_house0','x_house1','x_house2','x_house3','x_house4','x_i_camera','x_i_clap','x_i_heart','x_i_mega','x_i_star','x_k_cheer0','x_k_cheer1','x_k_cheer2','x_k_pose','x_k_sad0','x_k_walk0','x_k_walk1','x_k_walk2','x_k_walk3','x_k_walk4','x_k_walk5','x_k_walk6','x_o_barrier','x_o_cone0','x_o_cone1','x_o_hole0','x_o_hole1','x_o_tree','x_p_food','x_r_bg','x_v_clap0','x_v_clap1','x_v_clap2','x_v_clap3','x_v_clap4','x_v_clap5','x_v_clap6','x_v_run0','x_v_run1','x_v_run2','x_v_run3','x_v_run4','x_v_scared0','x_v_scared1','x_v_scared2','x_v_scared3', 'scene', 'k_idle', 'k_talk', 'k_prep', 'k_throw', 'k_cheer', 'k_sad', 'b_idle', 'b_block', 'b_dodge', 'b_selfie', 'b_tweet', 'b_hit', 'b_leave',
   'p_heart', 'p_kiss', 'p_donut', 'p_gift', 'p_doc', 'w_heart', 'w_kiss', 'w_donut', 'w_gift', 'w_doc', 'd_shield', 'd_shield2', 'd_selfie', 'd_bird', 'd_gust',
   'fx_heart', 'fx_spark', 'fx_donut', 'fx_crumbs', 'fx_paper', 'fx_gust', 'u_face', 'u_star', 'u_staroff', 'u_sling', 'u_pause', 'm_win', 'm_lose', 'e_portrait'];
@@ -693,7 +693,7 @@ LEVELS.push({
   },
   drawPolaroid() {
     const t = this.phT, k = ease(clamp(t / .35, 0, 1)), out = clamp((t - 2.7) / .3, 0, 1);
-    const pw = 300, ih = 405, iw = 270, ph = ih + 76, s = (.6 + .4 * k) * (1 - out * .15);
+    const pw = 300, ih = 360, iw = 270, ph = ih + 76, s = (.6 + .4 * k) * (1 - out * .15);
     ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(W / 2, 470); ctx.rotate(-.05 + (1 - k) * .2); ctx.scale(s, s);
     R(-pw / 2 + 8, -ph / 2 + 10, pw, ph, 'rgba(0,0,0,.35)'); R(-pw / 2, -ph / 2, pw, ph, '#fbf8f1'); R(-pw / 2, -ph / 2, pw, 2, '#fff');
     const ix = -iw / 2, iy = -ph / 2 + 15;

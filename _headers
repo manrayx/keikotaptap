@@ -2,3 +2,5 @@
   Cache-Control: public, max-age=604800
 /og.jpg
   Cache-Control: public, max-age=604800
+/arcade/assets/*
+  Cache-Control: public, max-age=3600

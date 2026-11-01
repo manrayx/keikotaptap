@@ -1,8 +1,10 @@
-/assets/*
+/taptap/assets/*
   Cache-Control: public, max-age=604800
-/og.jpg
-  Cache-Control: public, max-age=604800
+/pastora/assets/*
+  Cache-Control: public, max-age=3600
 /arcade/assets/*
   Cache-Control: public, max-age=3600
 /palafoto/assets/*
+  Cache-Control: public, max-age=3600
+/covers/*
   Cache-Control: public, max-age=3600

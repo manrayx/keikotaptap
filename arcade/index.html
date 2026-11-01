@@ -10,7 +10,7 @@
 <meta name="description" content="Keiko Arcade: cinco niveles para que Bukele por fin le haga caso. Sátira política en pixel art.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="KEIKO ARCADE">
-<meta property="og:description" content="Cinco niveles para que Bukele por fin le haga caso. Sátira política en pixel art.">
+<meta property="og:description" content="Cuatro niveles para que Bukele por fin le haga caso. Sátira política en pixel art.">
 <meta property="og:image" content="https://keikotaptap.com/arcade/og.jpg">
 <meta property="og:url" content="https://keikotaptap.com/arcade/">
 <meta name="twitter:card" content="summary_large_image">
@@ -471,14 +471,14 @@ function drawTitle() {
   T('MNRY PRESENTA', W / 2, 40, { size: 10, font: F1, align: 'center', color: '#ffffffcc' });
   T('KEIKO', W / 2, 74, { size: 50, font: F1, align: 'center', color: COL.gold, outline: COL.ink, ow: 10, shadow: COL.red2, sd: 5 });
   T('ARCADE', W / 2, 134, { size: 50, font: F1, align: 'center', color: COL.pink, outline: COL.ink, ow: 10, shadow: COL.gold2, sd: 5 });
-  rr(130, 208, 280, 40, 8, COL.red, COL.ink, 3); T('5 NIVELES · 1 MISIÓN', W / 2, 222, { size: 10, font: F1, align: 'center', color: '#fff' });
+  rr(130, 208, 280, 40, 8, COL.red, COL.ink, 3); T('4 NIVELES · 1 MISIÓN', W / 2, 222, { size: 10, font: F1, align: 'center', color: '#fff' });
   spr('k_cheer', 140, 560, 2.6); spr('b_idle', 400, 560, 2.6);
   sprR('p_heart', 270 + Math.sin(sceneT * 2) * 40, 380 + Math.cos(sceneT * 3) * 20, .8, Math.sin(sceneT * 3) * .3); sprR('p_donut', 250 - Math.sin(sceneT * 2) * 30, 450, .7, sceneT * 4);
   T('Que Bukele por fin le haga caso.', W / 2, 600, { size: 22, align: 'center', color: '#fff' });
   T('Lanza, vuela, inaugura, salta y corre.', W / 2, 630, { size: 16, align: 'center', color: COL.muted, weight: 600 });
   if (scene === 'loading') { T('cargando…', W / 2, 700, { size: 16, align: 'center', color: COL.muted }); return; }
   const a = [110, 690, 320, 70]; btn(a, '▶ JUGAR', 'green', { size: 18 }); addUI(a, () => setScene('select'));
-  { const st = bestL.reduce((a, b) => a + b.stars, 0); if (st) T('★ ' + st + ' de 15 estrellas', W / 2, 790, { size: 17, align: 'center', color: COL.gold }); }
+  { const st = bestL.reduce((a, b) => a + b.stars, 0); if (st) T('★ ' + st + ' de ' + NL * 3 + ' estrellas', W / 2, 790, { size: 17, align: 'center', color: COL.gold }); }
   const mr = [496, 14, 34, 34]; rr(mr[0], mr[1], mr[2], mr[3], 6, COL.panel2); drawSpeaker(503, 24, muted); addUI(mr, toggleMute);
   T('Videojuego de sátira política · Obra ficticia', W / 2, 880, { size: 13, align: 'center', color: COL.muted, weight: 600 });
   credit(910);
@@ -500,15 +500,15 @@ function wid(k, s) { return ok(k) ? IMG[k].width * s : 0; }
    NIVELES 2 A 5 (vertical) · cada nivel: start, update, draw, down/move/up, key
    ========================================================================= */
 let LV = null, CUR = 0, RES = null, OT = 0, supAuto = false, overTouched = false;
-let RUN = { scores: [0, 0, 0, 0, 0], stars: [0, 0, 0, 0, 0], retries: 0 };
-let bestL = store.get('bestL', [0, 0, 0, 0, 0].map(() => ({ stars: 0, score: 0 })));
+let RUN = { scores: [0, 0, 0, 0], stars: [0, 0, 0, 0], retries: 0 };
+let bestL = store.get('bestL4', [0, 0, 0, 0].map(() => ({ stars: 0, score: 0 })));
 const NAMES = ['OPERACIÓN BUKELE', 'AYUDA CON FOTO', 'INAUGURADORA', 'FOTO CON EL PUEBLO', 'CARAVANA PRESIDENCIAL'];
 const ICONS = ['b_idle', 'x_h_fly', 'x_c_cut', 'x_k_pose', 'x_o_cone0'];
 const HOWTO = [
   { goal: 'Agota la paciencia de Bukele en 9 lanzamientos.', how: ['Toca, jala hacia atrás y suelta.', 'En el aire, toca la pantalla para el poder especial.', 'Bukele avisa antes de defenderse: aprovecha la ventana.'] },
   { goal: 'Consigue 8 fotos entregando víveres sin volarle los techos al pueblo.', how: ['Mantén presionado para bajar; suelta para subir.', 'Pasa sobre la gente marcada con la cámara, a la altura de la franja verde.', 'Más abajo, las calaminas salen volando.'] },
   { goal: 'Inaugura 15 obras terminadas sin cortar maquetas ni proyectos falsos.', how: ['Desliza el dedo para cortar la cinta.', 'Corta solo la obra con placa ✓.', 'Tres escándalos y se acaba la temporada de inauguraciones.'] },
-  { goal: 'Sube 1000 m de aprobación saltando de tarima en tarima.', how: ['Mueve el dedo a la izquierda o a la derecha.', 'Junta flashes; las cámaras te impulsan.', 'Evita los micrófonos: las preguntas incómodas te tumban.'] },
+  { goal: 'Sube 1000 m de aprobación saltando de tarima en tarima.', how: ['Mueve el dedo a la izquierda o a la derecha.', 'Cae donde está la gente con la cámara: ¡clic!, foto con el pueblo y más popularidad.', 'Evita los micrófonos: las preguntas incómodas te tumban.'] },
   { goal: 'Lleva la caravana 2500 m sin perder tus 3 vidas.', how: ['Desliza a los lados para cambiar de carril.', 'Desliza hacia arriba (o toca) para saltar huecos y conos.', 'Barreras y árboles: hay que esquivarlos. Junta votos.'] }
 ];
 function openHowto(i) { CUR = i; document.getElementById('support').hidden = true; shareEl.hidden = true; MUSIC.on = false; setScene('howto'); }
@@ -530,7 +530,7 @@ function levelOver() {
   }
   if (RES.win) { RUN.scores[CUR] = Math.max(RUN.scores[CUR], RES.score); RUN.stars[CUR] = Math.max(RUN.stars[CUR], RES.stars); } else RUN.retries++;
   const b = bestL[CUR]; RES.newBest = RES.win && RES.score > b.score;
-  if (RES.win) { bestL[CUR] = { stars: Math.max(b.stars, RES.stars), score: Math.max(b.score, RES.score) }; store.set('bestL', bestL); }
+  if (RES.win) { bestL[CUR] = { stars: Math.max(b.stars, RES.stars), score: Math.max(b.score, RES.score) }; store.set('bestL4', bestL); }
   OT = 0; overTouched = false; setScene('over');
 }
 function hudBase(title, right) {
@@ -695,7 +695,7 @@ LEVELS.push({
   goal: 1000,
   start() {
     LFX.fx = []; LFX.floats = [];
-    Object.assign(this, { x: 270, y: 820, vx: 0, vy: -900, dir: 1, tx: null, plats: [], items: [], cam: 0, maxH: 0, flashes: 0, stun: 0, pose: 0, score: 0, keyL: false, keyR: false });
+    Object.assign(this, { x: 270, y: 820, vx: 0, vy: -900, dir: 1, tx: null, plats: [], items: [], cam: 0, maxH: 0, flashes: 0, selfies: 0, flashT: 0, stun: 0, pose: 0, score: 0, keyL: false, keyR: false });
     let y = 880; this.plats.push({ x: 270, y: 900, w: 160, mv: 0 });
     while (y > -200) { y -= rand(70, 105); this.addPlat(y); }
   },
@@ -703,14 +703,14 @@ LEVELS.push({
     const hgt_ = Math.max(0, -this.cam / 8), mv = hgt_ > 200 && Math.random() < .3 ? rand(40, 90) * pick([-1, 1]) : 0;
     const p = { x: rand(60, 480), y, w: Math.max(70, 100 - hgt_ / 30), mv }; this.plats.push(p);
     const r = Math.random();
-    if (r < .22) this.items.push({ k: 'flash', x: p.x + rand(-20, 20), y: y - 60 });
-    else if (r < .3) this.items.push({ k: 'cam', x: p.x, y: y - 26 });
+    if (r < .18) this.items.push({ k: 'flash', x: p.x + rand(-20, 20), y: y - 60 });
+    else if (r < .32 && !p.mv) { p.w = Math.max(p.w, 120); this.items.push({ k: 'cam', p, x: p.x, y, v: (Math.random() * 7) | 0, v2: (Math.random() * 7) | 0 }); }
     else if (r < .3 + Math.min(.22, hgt_ / 2500)) this.items.push({ k: 'mic', x: rand(60, 480), y: y - rand(40, 90), ph: rand(0, 6) });
   },
   down(p) { this.tx = p.x; }, move(p) { this.tx = p.x; }, up() { this.tx = null; },
   key(k, d) { if (k === 'ArrowLeft') this.keyL = d; if (k === 'ArrowRight') this.keyR = d; },
   update(dt) {
-    lfxUpdate(dt); this.stun -= dt; this.pose -= dt;
+    lfxUpdate(dt); this.stun -= dt; this.pose -= dt; this.flashT = Math.max(0, this.flashT - dt * 2.5);
     if (this.ended) { this.endT += dt; if (this.endT > 2.2) levelOver(); return; }
     // movimiento horizontal: sigue al dedo
     let ax = 0; if (this.tx !== null) ax = clamp((this.tx - this.x) * 9, -900, 900); if (this.keyL) ax = -700; if (this.keyR) ax = 700;
@@ -720,11 +720,12 @@ LEVELS.push({
     for (const p of this.plats) { if (p.mv) { p.x += p.mv * dt; if (p.x < 50 || p.x > 490) p.mv *= -1; } }
     if (this.vy > 0 && this.stun <= 0) for (const p of this.plats) if (prevY <= p.y && this.y >= p.y && Math.abs(this.x - p.x) < p.w / 2 + 10) { this.y = p.y; this.vy = -880; SFX.stretch(.4); break; }
     for (const it of this.items) {
-      if (it.got) continue; const dy = it.k === 'mic' ? Math.sin(sceneT * 2 + it.ph) * 20 : 0; it.dx = it.k === 'mic' ? Math.sin(sceneT * 1.3 + it.ph) * 50 : 0;
+      if (it.got) continue;
+      if (it.k === 'cam') { if (Math.abs(this.x - it.p.x) < 52 && Math.abs(this.y - it.p.y) < 70) { it.got = true; it.t = 0; this.selfies++; this.score += 150; this.pose = .9; this.flashT = .9; this.vy = -1450; SFX.selfie(); noise(.03, .12); tone(2400, .03, 'square', .04, 0, .06); lfloat('¡CLIC! +POPULARIDAD', it.p.x, it.p.y - this.cam - 150 + this.cam, COL.gold, 11); } continue; }
+      const dy = it.k === 'mic' ? Math.sin(sceneT * 2 + it.ph) * 20 : 0; it.dx = it.k === 'mic' ? Math.sin(sceneT * 1.3 + it.ph) * 50 : 0;
       if (Math.abs(this.x - (it.x + it.dx)) < 34 && Math.abs(this.y - 50 - (it.y + dy)) < 48) {
         it.got = true;
         if (it.k === 'flash') { this.flashes++; this.score += 50; this.pose = .35; SFX.selfie(); lfloat('¡FLASH!', it.x, it.y - 20, COL.gold, 10); }
-        if (it.k === 'cam') { this.vy = -1550; this.score += 100; SFX.power(); lfloat('¡SELFIE CON EL PUEBLO!', it.x, it.y - 30, COL.cyan, 9); lfx('x_flash1', it.x, it.y, .8, .4); }
         if (it.k === 'mic' && this.stun <= 0) { this.stun = .7; this.vy = 380; SFX.bad(); lfloat('¡PREGUNTA INCÓMODA!', W / 2, this.y - this.cam - 140 + this.cam, COL.red, 11); }
       }
     }
@@ -732,9 +733,9 @@ LEVELS.push({
     if (this.y < this.cam + 380) { const d = this.cam + 380 - this.y; this.cam -= d; }
     const h = Math.max(0, (820 - this.y) / 8); if (h > this.maxH) { this.maxH = h; }
     while (Math.min(...this.plats.map(p => p.y)) > this.cam - 120) this.addPlat(Math.min(...this.plats.map(p => p.y)) - rand(75, 110 + Math.min(40, this.maxH / 25)));
-    this.plats = this.plats.filter(p => p.y < this.cam + H + 60); this.items = this.items.filter(i => i.y < this.cam + H + 60 && !i.got);
-    if (this.maxH >= this.goal) finishLevel(true, this.flashes >= 14 ? 3 : this.flashes >= 7 ? 2 : 1, this.maxH * 2 + this.flashes * 80, '¡APROBACIÓN POR LAS NUBES!', 'Llegaste a la foto más alta del pueblo.', [['Altura', Math.round(this.maxH) + ' m'], ['Flashes', String(this.flashes)]]);
-    else if (this.y > this.cam + H + 40) finishLevel(false, 0, this.maxH * 2, 'SE CAYÓ LA APROBACIÓN', 'Te faltó una tarima.', [['Altura', Math.round(this.maxH) + ' m de ' + this.goal], ['Flashes', String(this.flashes)]]);
+    this.plats = this.plats.filter(p => p.y < this.cam + H + 60); this.items = this.items.filter(i => i.y < this.cam + H + 60 && (!i.got || i.k === 'cam'));
+    if (this.maxH >= this.goal) finishLevel(true, this.selfies >= 8 ? 3 : this.selfies >= 4 ? 2 : 1, this.maxH * 2 + this.flashes * 80 + this.selfies * 150, '¡APROBACIÓN POR LAS NUBES!', 'Llegaste a la foto más alta del pueblo.', [['Altura', Math.round(this.maxH) + ' m'], ['Fotos con la gente', String(this.selfies)], ['Flashes', String(this.flashes)]]);
+    else if (this.y > this.cam + H + 40) finishLevel(false, 0, this.maxH * 2, 'SE CAYÓ LA APROBACIÓN', 'Te faltó una tarima.', [['Altura', Math.round(this.maxH) + ' m de ' + this.goal], ['Fotos con la gente', String(this.selfies)]]);
   },
   draw() {
     const h = this.maxH / this.goal, g = ctx.createLinearGradient(0, HUD, 0, H);
@@ -745,15 +746,20 @@ LEVELS.push({
     for (const p of this.plats) { R(p.x - p.w / 2, p.y, p.w, 12, '#7a4a24'); R(p.x - p.w / 2, p.y, p.w, 3, '#b07a44'); for (let i = 0; i < p.w; i += 16) { ctx.fillStyle = (i / 16) % 2 ? '#fff' : '#d91023'; ctx.beginPath(); ctx.moveTo(p.x - p.w / 2 + i, p.y + 12); ctx.lineTo(p.x - p.w / 2 + i + 16, p.y + 12); ctx.lineTo(p.x - p.w / 2 + i + 8, p.y + 22); ctx.fill(); } }
     for (const it of this.items) {
       if (it.k === 'flash') sprC('x_flash' + (Math.floor(sceneT * 6) % 3), it.x, it.y, .9);
-      if (it.k === 'cam') sprC('x_i_camera', it.x, it.y + Math.sin(sceneT * 4) * 4, .85);
+      if (it.k === 'cam') { const p = it.p, happy = it.got;
+        const bob = happy && Math.sin(sceneT * 16) > 0 ? -3 : 0;
+        spr('x_v_clap' + (happy ? (Math.floor(sceneT * 8) % 7) : it.v), p.x - 32, p.y + bob, .95); spr('x_v_clap' + (happy ? ((Math.floor(sceneT * 8) + 3) % 7) : it.v2), p.x + 32, p.y + bob, .95, { flip: true });
+        if (!happy) { sprC('x_i_camera', p.x, p.y - 128 + Math.sin(sceneT * 4) * 5, .7); T('¡FOTO!', p.x, p.y - 166 + Math.sin(sceneT * 4) * 5, { size: 8, font: F1, align: 'center', color: '#fff', outline: COL.ink, ow: 3 }); }
+        else if (it.t !== undefined && (it.t += 1 / 60) < 1.2) heart(p.x, p.y - 100 - it.t * 40, 3, COL.pink, 1 - it.t / 1.2); }
       if (it.k === 'mic') { const x = it.x + (it.dx || 0), y = it.y + Math.sin(sceneT * 2 + it.ph) * 20; R(x - 3, y, 6, 40, '#555'); rr(x - 10, y - 18, 20, 24, 8, '#333', '#111', 2); bubble('?', x + 26, y - 50, '#fff'); }
     }
     const k = this.stun > 0 ? 'x_k_sad0' : this.pose > 0 ? 'x_k_pose' : this.vy < -300 ? 'x_k_cheer' + (Math.floor(sceneT * 6) % 3) : 'x_k_walk' + (Math.floor(sceneT * 10) % 7);
     spr(k, this.x, this.y + 2, .95, { flip: this.dir < 0 && k.startsWith('x_k_walk') });
     ctx.restore();
     lfxDraw();
+    if (this.flashT > 0) { ctx.globalAlpha = Math.min(1, this.flashT) * .8; R(0, HUD, W, H - HUD, '#fff'); ctx.globalAlpha = 1; }
     if (!this.ended && sceneT < 3.5) { rr(90, 140, 360, 64, 10, '#0b0f1acc', COL.gold, 2); T('MUEVE EL DEDO', W / 2, 154, { size: 10, font: F1, align: 'center', color: '#fff' }); T('a la izquierda o a la derecha', W / 2, 174, { size: 15, align: 'center', color: COL.gold }); }
-    hudBase('FOTO CON EL PUEBLO', () => { meter('APROBACIÓN ' + Math.round(this.maxH) + ' / ' + this.goal + ' m', this.maxH, this.goal, 74, 50, 280, COL.pink); T('📸 ' + this.flashes, 450, 56, { size: 14, align: 'right', color: COL.gold }); });
+    hudBase('FOTO CON EL PUEBLO', () => { meter('APROBACIÓN ' + Math.round(this.maxH) + ' / ' + this.goal + ' m', this.maxH, this.goal, 74, 50, 280, COL.pink); T('📸 ' + this.selfies, 450, 56, { size: 14, align: 'right', color: COL.gold }); });
   }
 });
 
@@ -821,6 +827,9 @@ LEVELS.push({
   }
 });
 
+/* Inauguradora fuera del juego: quedan 4 niveles */
+LEVELS.splice(2, 1); NAMES.splice(2, 1); ICONS.splice(2, 1); HOWTO.splice(2, 1);
+const NL = NAMES.length;
 /* ---------- pantallas comunes ---------- */
 function starsRow(n, x, y, size) { for (let i = 0; i < 3; i++) { const k = i < n ? 'u_star' : 'u_staroff'; if (ok(k)) ctx.drawImage(IMG[k], x + i * (size + 6), y, size, size); } }
 function drawSelect() {
@@ -844,7 +853,7 @@ function drawHowto() {
   if (ok('scene')) { ctx.globalAlpha = .2; ctx.drawImage(IMG.scene, 0, 6, 449, 419, 0, 300, W, 504); ctx.globalAlpha = 1; }
   const L = HOWTO[CUR];
   rr(30, 90, 480, 640, 16, '#0b0f1af0', COL.gold, 3);
-  T('NIVEL ' + (CUR + 1) + ' DE 5', W / 2, 116, { size: 10, font: F1, align: 'center', color: COL.muted });
+  T('NIVEL ' + (CUR + 1) + ' DE ' + NL, W / 2, 116, { size: 10, font: F1, align: 'center', color: COL.muted });
   wrap(NAMES[CUR], 440, 18, F1).forEach((ln, i) => T(ln, W / 2, 140 + i * 26, { size: 18, font: F1, align: 'center', color: COL.gold, outline: COL.ink, ow: 5 }));
   const k = ICONS[CUR]; spr(k, W / 2, 360, Math.min(2.2, 150 / hgt(k, 1), 280 / wid(k, 1)));
   wrap(L.goal, 420, 19).forEach((ln, i) => T(ln, W / 2, 384 + i * 24, { size: 19, align: 'center', color: '#fff' }));
@@ -874,7 +883,7 @@ function drawOver() {
     if (t > 1.4) {
       const y0 = py + 40 + rows.length * 27;
       const a = [50, y0, 440, 62], b = [50, y0 + 72, 214, 50], c = [276, y0 + 72, 214, 50];
-      if (win && CUR < 4) { btn(a, 'SIGUIENTE NIVEL →', 'green', { size: 13 }); addUI(a, () => openHowto(CUR + 1)); }
+      if (win && CUR < NL - 1) { btn(a, 'SIGUIENTE NIVEL →', 'green', { size: 13 }); addUI(a, () => openHowto(CUR + 1)); }
       else if (win) { btn(a, 'VER EL FINAL ★', 'gold', { size: 13 }); addUI(a, () => { OT = 0; supAuto = false; overTouched = false; setScene('final'); track('final'); }); }
       else { btn(a, '↻ REINTENTAR', 'green', { size: 13 }); addUI(a, () => startLevel(CUR)); }
       btn(b, 'NIVELES', 'blue', { size: 10 }); addUI(b, () => setScene('select'));
@@ -898,13 +907,13 @@ function drawFinal() {
   const total = RUN.scores.reduce((a, b) => a + b, 0), stars = RUN.stars.reduce((a, b) => a + b, 0);
   if (t > .8) {
     T(full(total) + ' PUNTOS', W / 2, 148, { size: 18, font: F1, align: 'center', color: '#fff' });
-    T('★ ' + stars + ' de 15 estrellas', W / 2, 180, { size: 18, align: 'center', color: COL.gold });
+    T('★ ' + stars + ' de ' + NL * 3 + ' estrellas', W / 2, 180, { size: 18, align: 'center', color: COL.gold });
     T('Reintentos: ' + RUN.retries, W / 2, 206, { size: 15, align: 'center', color: COL.muted, weight: 600 });
   }
   if (t > 1.4) {
     R(0, 740, W, 220, 'rgba(5,7,13,.92)');
     const a = [50, 752, 440, 56], b = [50, 816, 214, 46], c = [276, 816, 214, 46];
-    btn(a, '↻ JUGAR DE NUEVO', 'green', { size: 12 }); addUI(a, () => { RUN = { scores: [0, 0, 0, 0, 0], stars: [0, 0, 0, 0, 0], retries: 0 }; openHowto(0); });
+    btn(a, '↻ JUGAR DE NUEVO', 'green', { size: 12 }); addUI(a, () => { RUN = { scores: [0, 0, 0, 0], stars: [0, 0, 0, 0], retries: 0 }; openHowto(0); });
     btn(b, 'COMPARTIR', 'pink', { size: 10 }); addUI(b, openShare); btn(c, 'INICIO', 'gray', { size: 10 }); addUI(c, () => setScene('title'));
     const yb = [50, 870, 214, 54], mm = [276, 870, 214, 54]; yapeBtn(yb); addUI(yb, openSupport); ghostBtn(mm, '¿UN JUEGO PARA', 'TU MARCA? · MNRY', COL.cyan); addUI(mm, openMNRY);
     credit(936, 10);
@@ -932,7 +941,7 @@ function buildCard() {
     R(0, PANEL - 10, W, H - PANEL + 10, COL.ink); R(0, PANEL - 10, W, 2, COL.line);
     const pts = fin ? RUN.scores.reduce((a, b) => a + b, 0) : RES.score;
     T(full(pts) + ' PUNTOS', W / 2, PANEL + 20, { size: 22, font: F1, align: 'center', color: '#fff' });
-    T(fin ? '★ ' + RUN.stars.reduce((a, b) => a + b, 0) + ' de 15 estrellas' : RES.sub, W / 2, PANEL + 62, { size: 17, align: 'center', color: COL.muted });
+    T(fin ? '★ ' + RUN.stars.reduce((a, b) => a + b, 0) + ' de ' + NL * 3 + ' estrellas' : RES.sub, W / 2, PANEL + 62, { size: 17, align: 'center', color: COL.muted });
     rr(120, PANEL + 98, 300, 50, 10, COL.pink); T('¿ME SUPERAS?', W / 2, PANEL + 115, { size: 14, font: F1, align: 'center', color: '#fff' });
     T('Desarrollado por MNRY · mantarraya.pe', W / 2, H - 34, { size: 13, align: 'center', color: COL.muted, weight: 400 });
   });
@@ -1012,7 +1021,7 @@ function placeCredit() {
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
-  if (scene === 'loading' && loaded >= ASSETS.length) { setScene('title'); if (window.__jump) { const n = clamp(+window.__jump - 1, 0, 4); window.__jump = null; if (location.hash.includes('final')) { setScene('final'); } else openHowto(n); } }
+  if (scene === 'loading' && loaded >= ASSETS.length) { setScene('title'); if (window.__jump) { const n = clamp(+window.__jump - 1, 0, NL - 1); window.__jump = null; if (location.hash.includes('final')) { setScene('final'); } else openHowto(n); } }
   if (scene !== 'pause') update(dt); else sceneT += 0;
   ctx.setTransform(K, 0, 0, K, 0, 0); ctx.imageSmoothingEnabled = false;
   if (scene === 'title' || scene === 'loading') drawTitle();

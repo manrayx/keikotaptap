@@ -8,3 +8,5 @@
   Cache-Control: public, max-age=3600
 /covers/*
   Cache-Control: public, max-age=3600
+/ridiculo/assets/*
+  Cache-Control: public, max-age=3600

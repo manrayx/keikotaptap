@@ -1155,7 +1155,7 @@ async function sharePost() {
 /* ---------- CIERRE: Yape, MNRY, compartir ---------- */
 const SITE_URL = 'https://keikotaptap.com/ridiculo/';
 const MNRY_URL = 'https://mantarraya.pe';
-function track(name) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} }
+function track(name) { name = 'ridiculo-' + name; try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} }
 let overTouched = false, supTimer = null;
 function openSupport(auto) {
   track(auto ? 'yape-abierto-auto' : 'yape-abierto-boton');

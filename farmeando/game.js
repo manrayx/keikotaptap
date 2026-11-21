@@ -84,7 +84,7 @@ const SFX = {
   combo() { snd('combo', 0.85); },
   apagon() { apagonN++; snd(apagonN % 2 ? 'apagon' : 'apagon2', 1); },
   glitch() { snd('static', 0.7); },
-  win() { snd(choice('win', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig'), 1); },
+  win() { snd(choice('laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig'), 1); },
   lose() { snd(choice('lose', 'ohno1', 'ohno2', 'ohno3', 'ohno4'), 1); },
   final() { snd('final', 1); },
 };
@@ -111,6 +111,7 @@ const KUNTE_TAURO_SND = new Audio('assets/audio/kunte_pierde_tauro.mp3'); KUNTE_
 const ESPA_CASA_SND = new Audio('assets/audio/espa_pierde_casa.mp3'); ESPA_CASA_SND.preload = 'auto'; ESPA_CASA_SND.volume = 0.95;
 const ESPA_MISA_SND = new Audio('assets/audio/espa_pierde_misa.mp3'); ESPA_MISA_SND.preload = 'auto'; ESPA_MISA_SND.volume = 0.95;
 const KUNTE_RUSIA_SND = new Audio('assets/audio/kunte_pierde_rusia.mp3'); KUNTE_RUSIA_SND.preload = 'auto'; KUNTE_RUSIA_SND.volume = 0.95;
+const ESPA_RUSIA_SND = new Audio('assets/audio/espa_pierde_rusia.mp3'); ESPA_RUSIA_SND.preload = 'auto'; ESPA_RUSIA_SND.volume = 0.95;
 const ESPA_R3_SND = new Audio('assets/audio/espa_pierde_r3.mp3'); ESPA_R3_SND.preload = 'auto'; ESPA_R3_SND.volume = 0.9;
 let lastOutfitWarned = false;
 function checkLastOutfit(f) {
@@ -448,7 +449,7 @@ function hazards(dt) {
 }
 
 // ---------- Bucle ----------
-let slowmo = 0;
+let slowmo = 0, koLaugh = false;
 function update(dt) {
   const realDt = dt;
   if (slowmo > 0) { dt *= 0.22; slowmo = Math.max(0, slowmo - realDt); }
@@ -461,6 +462,7 @@ function update(dt) {
     const pl = P.slots.some(Boolean) || P.closet.length, rl = R.slots.some(Boolean) || R.closet.length;
     if (!pl || !rl || timeLeft <= 0) endRound();
   }
+  if (state === 'ko' && !koLaugh && stateT > 1.25) { koLaugh = true; SFX.win(); }
   if (state === 'ko' && stateT > 3.4) afterKO();
   [P, R].forEach(f => {
     if (!f) return;
@@ -493,19 +495,16 @@ function endRound() {
   const dir = loser.side < 0 ? -1 : 1;
   loser.fly = { t: 0, x: 0, y: 0, rot: 0, vx: dir * 300, vy: -520, vr: dir * 3.2 };
   slowmo = 1.3;
-  SFX.ko(); flash = 1; flashCol = '#fff'; shake = 0.6;
+  koLaugh = false; SFX.ko(); flash = 1; flashCol = '#fff'; shake = 0.6;
   spr('boom', loser.x, chestPos(loser).y, 1.8); spr('ko', loser.x, GROUND - 30, 1.6); spr('lines', W / 2, SCENE_Y + SCENE_H / 2, 2.4);
   if (won) score += lives(P) * 150 + 1000;
   setTimeout(() => {
     if (state !== 'ko') return;
-    if (loser.char === 'kunte' && stageIdx === 0 && musicOn && userStarted) { try { KUNTE_RUSIA_SND.currentTime = 0; KUNTE_RUSIA_SND.play().catch(() => { }); return; } catch (_) { } }
-    if (loser.char === 'kunte' && stageIdx === 1 && musicOn && userStarted) { try { KUNTE_R2_SND.currentTime = 0; KUNTE_R2_SND.play().catch(() => { }); return; } catch (_) { } }
-    if (loser.char === 'kunte' && stageIdx === 2 && musicOn && userStarted) { try { KUNTE_TAURO_SND.currentTime = 0; KUNTE_TAURO_SND.play().catch(() => { }); return; } catch (_) { } }
-    if (loser.char === 'espa' && stageIdx === 1 && musicOn && userStarted) { try { ESPA_CASA_SND.currentTime = 0; ESPA_CASA_SND.play().catch(() => { }); return; } catch (_) { } }
-    if (loser.char === 'espa' && stageIdx === 3 && musicOn && userStarted) { try { ESPA_MISA_SND.currentTime = 0; ESPA_MISA_SND.play().catch(() => { }); return; } catch (_) { } }
-    if (loser.char === 'espa' && stageIdx === 2 && musicOn && userStarted) { try { ESPA_R3_SND.currentTime = 0; ESPA_R3_SND.play().catch(() => { }); return; } catch (_) { } }
-    if (won) { SFX.win(); return; }
-    if (musicOn && userStarted) { try { LOSE_SND.currentTime = 0; LOSE_SND.play().catch(() => SFX.lose()); } catch (_) { SFX.lose(); } } else SFX.lose();
+    // Primero el lamento del perdedor; la risa del ganador entra después, cuando aparece su sprite riendo (ver update()).
+    const lament = { kunte: [KUNTE_RUSIA_SND, KUNTE_R2_SND, KUNTE_TAURO_SND, null], espa: [ESPA_RUSIA_SND, ESPA_CASA_SND, ESPA_R3_SND, ESPA_MISA_SND] }[loser.char][stageIdx];
+    if (lament && musicOn && userStarted) { try { lament.currentTime = 0; lament.play().catch(() => { }); return; } catch (_) { } }
+    if (loser === P) { if (musicOn && userStarted) { try { LOSE_SND.currentTime = 0; LOSE_SND.play().catch(() => SFX.lose()); } catch (_) { SFX.lose(); } } else SFX.lose(); }
+    else SFX.lose();
   }, 550);
   if (won && stageIdx === STAGES.length - 1) setTimeout(() => { if (state === 'ko') SFX.final(); }, 1300);
   setState('ko');

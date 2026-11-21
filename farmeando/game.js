@@ -106,6 +106,7 @@ const LOSE_SND = new Audio('assets/audio/pierde.mp3'); LOSE_SND.preload = 'auto'
 // Aviso: en el primer round, cuando al jugador le queda un solo outfit en el perchero.
 const LAST_SND = new Audio('assets/audio/ultimo.mp3'); LAST_SND.preload = 'auto'; LAST_SND.volume = 0.9;
 // Cuando Espá pierde en el 3er round (lo maneje el jugador o el rival).
+const KUNTE_R2_SND = new Audio('assets/audio/kunte_pierde_r2.mp3'); KUNTE_R2_SND.preload = 'auto'; KUNTE_R2_SND.volume = 0.95;
 const ESPA_R3_SND = new Audio('assets/audio/espa_pierde_r3.mp3'); ESPA_R3_SND.preload = 'auto'; ESPA_R3_SND.volume = 0.9;
 let lastOutfitWarned = false;
 function checkLastOutfit(f) {
@@ -493,6 +494,7 @@ function endRound() {
   if (won) score += lives(P) * 150 + 1000;
   setTimeout(() => {
     if (state !== 'ko') return;
+    if (loser.char === 'kunte' && stageIdx === 1 && musicOn && userStarted) { try { KUNTE_R2_SND.currentTime = 0; KUNTE_R2_SND.play().catch(() => { }); return; } catch (_) { } }
     if (loser.char === 'espa' && stageIdx === 2 && musicOn && userStarted) { try { ESPA_R3_SND.currentTime = 0; ESPA_R3_SND.play().catch(() => { }); return; } catch (_) { } }
     if (won) { SFX.win(); return; }
     if (musicOn && userStarted) { try { LOSE_SND.currentTime = 0; LOSE_SND.play().catch(() => SFX.lose()); } catch (_) { SFX.lose(); } } else SFX.lose();

@@ -112,6 +112,7 @@ const ESPA_CASA_SND = new Audio('assets/audio/espa_pierde_casa.mp3'); ESPA_CASA_
 const ESPA_MISA_SND = new Audio('assets/audio/espa_pierde_misa.mp3'); ESPA_MISA_SND.preload = 'auto'; ESPA_MISA_SND.volume = 0.95;
 const KUNTE_RUSIA_SND = new Audio('assets/audio/kunte_pierde_rusia.mp3'); KUNTE_RUSIA_SND.preload = 'auto'; KUNTE_RUSIA_SND.volume = 0.95;
 const ESPA_RUSIA_SND = new Audio('assets/audio/espa_pierde_rusia.mp3'); ESPA_RUSIA_SND.preload = 'auto'; ESPA_RUSIA_SND.volume = 0.95;
+const KUNTE_MISA_SND = new Audio('assets/audio/kunte_pierde_misa.mp3'); KUNTE_MISA_SND.preload = 'auto'; KUNTE_MISA_SND.volume = 0.95;
 const ESPA_R3_SND = new Audio('assets/audio/espa_pierde_r3.mp3'); ESPA_R3_SND.preload = 'auto'; ESPA_R3_SND.volume = 0.9;
 let lastOutfitWarned = false;
 function checkLastOutfit(f) {
@@ -501,7 +502,7 @@ function endRound() {
   setTimeout(() => {
     if (state !== 'ko') return;
     // Primero el lamento del perdedor; la risa del ganador entra después, cuando aparece su sprite riendo (ver update()).
-    const lament = { kunte: [KUNTE_RUSIA_SND, KUNTE_R2_SND, KUNTE_TAURO_SND, null], espa: [ESPA_RUSIA_SND, ESPA_CASA_SND, ESPA_R3_SND, ESPA_MISA_SND] }[loser.char][stageIdx];
+    const lament = { kunte: [KUNTE_RUSIA_SND, KUNTE_R2_SND, KUNTE_TAURO_SND, KUNTE_MISA_SND], espa: [ESPA_RUSIA_SND, ESPA_CASA_SND, ESPA_R3_SND, ESPA_MISA_SND] }[loser.char][stageIdx];
     if (lament && musicOn && userStarted) { try { lament.currentTime = 0; lament.play().catch(() => { }); return; } catch (_) { } }
     if (loser === P) { if (musicOn && userStarted) { try { LOSE_SND.currentTime = 0; LOSE_SND.play().catch(() => SFX.lose()); } catch (_) { SFX.lose(); } } else SFX.lose(); }
     else SFX.lose();

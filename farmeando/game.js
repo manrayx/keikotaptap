@@ -733,7 +733,7 @@ function render() {
   }
   if (state === 'ko') {
     g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, SCENE_Y + 80, W, 140);
-    txt(result ? '¡HUACHAFO!' : '¡TE CALATEÓ!', W / 2, SCENE_Y + 150, 42, result ? '#ffd400' : '#ff4d6d', 'center', 8);
+    txt(result ? '¡HUACHAFO CAMPEÓN!' : '¡TE CALATEÓ!', W / 2, SCENE_Y + 150, 34, result ? '#ffd400' : '#ff4d6d', 'center', 8);
     if (stateT > 1.1) txt(result ? (stageIdx < 3 ? 'Le robaste ' + stolenStage + ' prendas' : '¡GANASTE LA MISA!') : 'Te dejaron sin ropa', W / 2, SCENE_Y + 195, 12, '#fff');
   }
   g.restore();

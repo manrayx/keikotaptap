@@ -9,10 +9,10 @@ const $ = id => document.getElementById(id);
 
 // ---------- Configuración ----------
 const STAGES = [
-  { key: 'rusia', name: 'RUSIA', sub: 'Plaza Roja', idle: [0.6, 1.2], guard: [0.8, 1.3], charge: 0.85, feint: 0 },
-  { key: 'casa', name: 'CASA DE LA LITERATURA', sub: 'Silencio, por favor', idle: [0.5, 1.0], guard: [0.7, 1.2], charge: 0.72, feint: 0.1 },
-  { key: 'tauro', name: 'CINE TAURO', sub: 'Función de medianoche', idle: [0.45, 0.9], guard: [0.6, 1.1], charge: 0.62, feint: 0.2, bgAnchor: 0.9 },
-  { key: 'misa', name: 'LA MISA DEL PAPA', sub: 'Las Palmas · caos total', idle: [0.4, 0.8], guard: [0.5, 1.0], charge: 0.55, feint: 0.3 },
+  { key: 'rusia', name: 'RUSIA', sub: 'Plaza Roja', idle: [0.6, 1.2], guard: [0.8, 1.3], charge: 0.85, feint: 0, stun: 1.15, atk: 0.5, dbl: 0, regen: 16 },
+  { key: 'casa', name: 'CASA DE LA LITERATURA', sub: 'Silencio, por favor', idle: [0.5, 1.0], guard: [0.7, 1.2], charge: 0.72, feint: 0.1, stun: 1.05, atk: 0.52, dbl: 0, regen: 15.5 },
+  { key: 'tauro', name: 'CINE TAURO', sub: 'Función de medianoche', idle: [0.42, 0.85], guard: [0.6, 1.1], charge: 0.58, feint: 0.25, stun: 0.9, atk: 0.58, dbl: 0.12, regen: 14.5, bgAnchor: 0.9 },
+  { key: 'misa', name: 'LA MISA DEL PAPA', sub: 'Las Palmas · caos total', idle: [0.3, 0.65], guard: [0.45, 0.9], charge: 0.46, feint: 0.4, stun: 0.7, atk: 0.66, dbl: 0.3, regen: 12.5 },
 ];
 const ROUND_TIME = 60, CLOSET = 5;
 const CHARS = {
@@ -383,16 +383,18 @@ function rivalUpdate(dt) {
       ray(r, P, CHARS[r.char].aura, true, () => { spr('blockhit', P.x + 75, chestPos(P).y, 1.3); spr('shield', P.x + 50, chestPos(P).y, 2.2); });
       setPose(P, 'block', 0.35);
       say('¡BLOQUEADO!', '#7cf6ff'); SFX.block(); score += 100;
-      r.st = 'stun'; r.stT = 0; r.stDur = 1.15; return;
+      r.st = 'stun'; r.stT = 0; r.stDur = st.stun; return;
     }
     combo = 0;
     ray(r, P, CHARS[r.char].aura, false, () => { steal(r, P); SFX.hit(); shake = 0.3; });
     say('¡TE DIO!', '#ff4d6d');
+    if (Math.random() < st.dbl) { r.st = 'idle'; r.stT = 0; r.stDur = 0.2; r.chain = true; return; }
   }
   r.stT = 0;
   const rnd = (a) => a[0] + Math.random() * (a[1] - a[0]);
   if (r.st !== 'idle') { r.st = 'idle'; r.stDur = rnd(st.idle); return; }
-  if (Math.random() < 0.5) { r.st = 'charge'; r.stDur = st.charge; r.feint = Math.random() < st.feint; SFX.charge(); }
+  const go = r.chain || Math.random() < st.atk; r.chain = false;
+  if (go) { r.st = 'charge'; r.stDur = st.charge; r.feint = Math.random() < st.feint; SFX.charge(); }
   else { r.st = 'guard'; r.stDur = rnd(st.guard); }
 }
 
@@ -429,7 +431,7 @@ function update(dt) {
   if (state === 'fight') {
     timeLeft = Math.max(0, timeLeft - dt);
     rivalUpdate(dt); hazards(dt);
-    P.energy = Math.min(100, P.energy + dt * 16);
+    P.energy = Math.min(100, P.energy + dt * STAGES[stageIdx].regen);
     const pl = P.slots.some(Boolean) || P.closet.length, rl = R.slots.some(Boolean) || R.closet.length;
     if (!pl || !rl || timeLeft <= 0) endRound();
   }

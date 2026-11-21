@@ -50,7 +50,7 @@ const now0 = () => AC ? AC.currentTime : 0;
 // ---------- Sonidos grabados (banco "Lista de sonido") ----------
 const SFXFILES = ['shoot', 'shoot2', 'hit', 'hit2', 'charge', 'shield', 'block', 'bounce', 'stun', 'rip', 'drop', 'wear', 'closet', 'combo', 'ko', 'win', 'final', 'lose', 'ouch1', 'ouch2', 'ouch3', 'ouch4', 'ohno1', 'ohno2', 'ohno3', 'ohno4', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig', 'hush', 'apagon', 'apagon_voz', 'static', 'water', 'spark'];
 const SND = {};
-SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=2'); a.preload = 'auto'; return a; }); });
+SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=3'); a.preload = 'auto'; return a; }); });
 const sndIdx = {};
 function snd(name, vol = 1) {
   if (sfxMute) return;

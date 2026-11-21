@@ -48,9 +48,9 @@ function noise(t, d, v = 0.2) {
 const now0 = () => AC ? AC.currentTime : 0;
 
 // ---------- Sonidos grabados (banco "Lista de sonido") ----------
-const SFXFILES = ['shoot', 'shoot2', 'hit', 'hit2', 'charge', 'shield', 'block', 'bounce', 'stun', 'rip', 'drop', 'wear', 'closet', 'combo', 'ko', 'win', 'final', 'lose', 'ouch1', 'ouch2', 'ouch3', 'ouch4', 'ohno1', 'ohno2', 'ohno3', 'ohno4', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig', 'hush', 'apagon', 'static', 'water', 'spark'];
+const SFXFILES = ['shoot', 'shoot2', 'hit', 'hit2', 'charge', 'shield', 'block', 'bounce', 'stun', 'rip', 'drop', 'wear', 'closet', 'combo', 'ko', 'win', 'final', 'lose', 'ouch1', 'ouch2', 'ouch3', 'ouch4', 'ohno1', 'ohno2', 'ohno3', 'ohno4', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig', 'hush', 'apagon', 'apagon_voz', 'static', 'water', 'spark'];
 const SND = {};
-SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=1'); a.preload = 'auto'; return a; }); });
+SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=2'); a.preload = 'auto'; return a; }); });
 const sndIdx = {};
 function snd(name, vol = 1) {
   if (sfxMute) return;
@@ -71,7 +71,7 @@ function crowdLoop(on) {
 const SFX = {
   zap() { tone(1500, now0(), 0.12, 'sawtooth', 0.12, 300); snd('shoot', 0.75); },
   steal() { const t = now0(); [523, 659, 784, 1046].forEach((f, i) => tone(f, t + i * 0.04, 0.09, 'square', 0.08)); snd('rip', 0.9); },
-  hit() { const t = now0(); noise(t, 0.15, 0.25); tone(160, t, 0.15, 'square', 0.15, 60); snd(choice('hit', 'hit2'), 0.9); snd(choice('ouch1', 'ouch2', 'ouch3', 'ouch4'), 0.5); },
+  hit() { const t = now0(); noise(t, 0.15, 0.25); tone(160, t, 0.15, 'square', 0.15, 60); snd(choice('hit', 'hit2'), 0.9); snd(choice('ouch1', 'ouch2', 'ouch3', 'ouch4'), 0.9); },
   bounce() { tone(220, now0(), 0.25, 'sawtooth', 0.15, 90); snd('bounce', 0.8); },
   block() { const t = now0(); tone(880, t, 0.08, 'triangle', 0.16); tone(1320, t + 0.05, 0.12, 'triangle', 0.13); snd('block', 0.85); snd('shield', 0.45); },
   charge() { tone(200, now0(), 0.45, 'square', 0.05, 700); snd('charge', 0.7); },
@@ -81,10 +81,10 @@ const SFX = {
   closet() { tone(980, now0(), 0.05, 'triangle', 0.08); snd('closet', 0.7); },
   stun() { snd('stun', 0.7); },
   combo() { snd('combo', 0.85); },
-  apagon() { snd('apagon', 0.8); },
+  apagon() { snd('apagon', 0.8); snd('apagon_voz', 1); },
   glitch() { snd('static', 0.7); },
-  win() { snd(choice('win', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig'), 0.9); },
-  lose() { snd(choice('lose', 'ohno1', 'ohno2', 'ohno3', 'ohno4'), 0.9); },
+  win() { snd(choice('win', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig'), 1); },
+  lose() { snd(choice('lose', 'ohno1', 'ohno2', 'ohno3', 'ohno4'), 1); },
   final() { snd('final', 1); },
 };
 const MUS = {}, ANN = {};
@@ -590,7 +590,16 @@ function rivalLabel() {
   txt('RIVAL: ' + m[0], W / 2, y + 2, big ? 16 : 14, (big && Math.floor(T * 10) % 2) ? '#fff' : m[1], 'center', 4);
 }
 function drawHUD() {
-  if (hz.glitch > 0 && Math.random() < 0.6) { g.fillStyle = '#000'; g.fillRect(0, 0, W, SCENE_Y); for (let i = 0; i < 24; i++) { g.fillStyle = ['#f00', '#0f0', '#00f', '#fff', '#ff0'][i % 5]; g.fillRect(Math.random() * W, Math.random() * 180, 40 + Math.random() * 90, 3); } return; }
+  drawHUD0();
+  if (hz.glitch > 0) {
+    g.globalAlpha = 0.45;
+    for (let i = 0; i < 14; i++) { g.fillStyle = ['#f00', '#0f0', '#00f', '#fff', '#ff0'][i % 5]; g.fillRect(Math.random() * W, Math.random() * SCENE_Y, 40 + Math.random() * 120, 2 + Math.random() * 3); }
+    g.globalAlpha = 1;
+    g.fillStyle = 'rgba(0,0,0,0.6)'; g.fillRect(W / 2 - 205, SCENE_Y + SCENE_H - 44, 410, 30);
+    txt('PANTALLAS GIGANTES CAÍDAS · SIGUE PELEANDO', W / 2, SCENE_Y + SCENE_H - 22, 9, '#ff4d6d', 'center', 3);
+  }
+}
+function drawHUD0() {
   g.fillStyle = 'rgba(0,0,0,0.6)'; g.fillRect(0, 0, W, 78);
   txt(CHARS[P.char].name, 12, 26, 11, CHARS[P.char].aura, 'left', 4);
   txt(CHARS[R.char].name, W - 12, 26, 11, CHARS[R.char].aura, 'right', 4);
@@ -649,7 +658,12 @@ function render() {
     }
   });
   parts.forEach(p => { g.globalAlpha = Math.max(0, 1 - p.t / p.life); g.fillStyle = p.col; g.fillRect(p.x, p.y, p.sz, p.sz); }); g.globalAlpha = 1;
-  if (hz.dark > 0) { const lit = Math.floor(T * 7) % 3 === 0; g.fillStyle = lit ? 'rgba(80,0,50,0.3)' : 'rgba(0,0,0,0.92)'; g.fillRect(0, SCENE_Y, W, SCENE_H); }
+  if (hz.dark > 0) {
+    const a = 0.55 + 0.07 * Math.sin(T * 9);
+    g.fillStyle = `rgba(12,0,30,${a})`; g.fillRect(0, SCENE_Y, W, SCENE_H);
+    g.fillStyle = 'rgba(0,0,0,0.6)'; g.fillRect(W / 2 - 190, SCENE_Y + SCENE_H - 44, 380, 30);
+    txt('APAGÓN EN EL CINE · SIGUE PELEANDO', W / 2, SCENE_Y + SCENE_H - 22, 10, '#ffd400', 'center', 3);
+  }
   if (hz.water > 0) { g.fillStyle = `rgba(90,180,255,${hz.water * 0.45})`; g.fillRect(0, SCENE_Y, W, SCENE_H); for (let i = 0; i < 40; i++) { g.fillStyle = 'rgba(200,240,255,0.8)'; g.fillRect(Math.random() * W, SCENE_Y + Math.random() * SCENE_H, 3, 18); } }
   if (flash > 0) { g.globalAlpha = flash * 0.6; g.fillStyle = flashCol; g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
   if (moya.active && IMG.moya_strip) {

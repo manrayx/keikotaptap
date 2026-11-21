@@ -48,9 +48,9 @@ function noise(t, d, v = 0.2) {
 const now0 = () => AC ? AC.currentTime : 0;
 
 // ---------- Sonidos grabados (banco "Lista de sonido") ----------
-const SFXFILES = ['shoot', 'shoot2', 'hit', 'hit2', 'charge', 'shield', 'block', 'bounce', 'stun', 'rip', 'drop', 'wear', 'closet', 'combo', 'ko', 'win', 'final', 'lose', 'ouch1', 'ouch2', 'ouch3', 'ouch4', 'ohno1', 'ohno2', 'ohno3', 'ohno4', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig', 'hush', 'apagon', 'apagon_voz', 'static', 'water', 'spark'];
+const SFXFILES = ['shoot', 'shoot2', 'hit', 'hit2', 'charge', 'shield', 'block', 'bounce', 'stun', 'rip', 'drop', 'wear', 'closet', 'combo', 'ko', 'win', 'final', 'lose', 'ouch1', 'ouch2', 'ouch3', 'ouch4', 'ohno1', 'ohno2', 'ohno3', 'ohno4', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig', 'hush', 'apagon', 'apagon2', 'apagon_voz', 'static', 'water', 'spark'];
 const SND = {};
-SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=3'); a.preload = 'auto'; return a; }); });
+SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=4'); a.preload = 'auto'; return a; }); });
 const sndIdx = {};
 function snd(name, vol = 1) {
   if (sfxMute) return;
@@ -68,6 +68,7 @@ function crowdLoop(on) {
   } else if (crowdAud) crowdAud.pause();
 }
 
+let apagonN = 0;
 const SFX = {
   zap() { tone(1500, now0(), 0.12, 'sawtooth', 0.12, 300); snd('shoot', 0.75); },
   steal() { const t = now0(); [523, 659, 784, 1046].forEach((f, i) => tone(f, t + i * 0.04, 0.09, 'square', 0.08)); snd('rip', 0.9); },
@@ -81,7 +82,7 @@ const SFX = {
   closet() { tone(980, now0(), 0.05, 'triangle', 0.08); snd('closet', 0.7); },
   stun() { snd('stun', 0.7); },
   combo() { snd('combo', 0.85); },
-  apagon() { snd('apagon', 0.8); snd('apagon_voz', 1); },
+  apagon() { apagonN++; snd(apagonN % 2 ? 'apagon' : 'apagon2', 0.9); snd('apagon_voz', 1); },
   glitch() { snd('static', 0.7); },
   win() { snd(choice('win', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig'), 1); },
   lose() { snd(choice('lose', 'ohno1', 'ohno2', 'ohno3', 'ohno4'), 1); },

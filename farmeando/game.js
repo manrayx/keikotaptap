@@ -655,8 +655,13 @@ function render() {
   if (moya.active && IMG.moya_strip) {
     const img = IMG.moya_strip, cw = img.width / MOYA_FRAMES, ch = img.height;
     const fr = Math.min(MOYA_FRAMES - 1, Math.floor(moya.t * 1000 / MOYA_MS));
-    const dh = 400, dw = cw * dh / ch;
-    g.drawImage(img, fr * cw, 0, cw, ch, W / 2 - dw / 2, GROUND - dh, dw, dh);
+    // Busto (del pecho para arriba) pegado a la esquina inferior derecha de la escena: el corte queda en el borde.
+    const dh = 230, dw = cw * dh / ch, bottom = SCENE_Y + SCENE_H;
+    const e = Math.min(1, moya.t / 0.25), out = Math.min(1, Math.max(0, (MOYA_DUR - moya.t) / 0.25));
+    const rise = (1 - Math.min(e, out)) * (1 - Math.min(e, out)) * dh;
+    g.save(); g.beginPath(); g.rect(0, SCENE_Y, W, SCENE_H); g.clip();
+    g.drawImage(img, fr * cw, 0, cw, ch, W - dw * 158 / 165, bottom - dh + rise, dw, dh);
+    g.restore();
   }
   if (state === 'fight' && P.stun > T) { g.fillStyle = 'rgba(90,90,100,0.35)'; g.fillRect(0, SCENE_Y, W, SCENE_H); }
   rivalLabel();

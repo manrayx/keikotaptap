@@ -729,7 +729,7 @@ function render() {
   if (state === 'intro') {
     g.fillStyle = 'rgba(0,0,0,0.72)'; g.fillRect(0, SCENE_Y + 70, W, 170);
     if (stateT < 1.6) { txt('ESCENARIO ' + (stageIdx + 1) + ' DE 4', W / 2, SCENE_Y + 110, 13, '#7cf6ff'); txt(STAGES[stageIdx].name, W / 2, SCENE_Y + 165, STAGES[stageIdx].name.length > 14 ? 19 : 34, '#ffd400', 'center', 8); txt(STAGES[stageIdx].sub, W / 2, SCENE_Y + 210, 11, '#fff'); }
-    else txt('¡A FARMEAR!', W / 2, SCENE_Y + 170, 34, '#ff3fd2');
+    else txt('¡A FARMEAR CRINGE!', W / 2, SCENE_Y + 170, 26, '#ff3fd2');
   }
   if (state === 'ko') {
     g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, SCENE_Y + 80, W, 140);

@@ -50,7 +50,7 @@ const now0 = () => AC ? AC.currentTime : 0;
 // ---------- Sonidos grabados (banco "Lista de sonido") ----------
 const SFXFILES = ['shoot', 'shoot2', 'hit', 'hit2', 'charge', 'shield', 'block', 'bounce', 'stun', 'rip', 'drop', 'wear', 'closet', 'combo', 'ko', 'win', 'final', 'lose', 'ouch1', 'ouch2', 'ouch3', 'ouch4', 'ohno1', 'ohno2', 'ohno3', 'ohno4', 'laugh1', 'laugh2', 'laugh3', 'laugh4', 'laughbig', 'hush', 'apagon', 'apagon2', 'static', 'water', 'spark'];
 const SND = {};
-SFXFILES.forEach(k => { SND[k] = [0, 1, 2].map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=5'); a.preload = 'auto'; return a; }); });
+SFXFILES.forEach(k => { SND[k] = (['shoot', 'hit', 'hit2', 'bounce', 'block'].includes(k) ? [0, 1, 2] : [0, 1]).map(() => { const a = new Audio('assets/sfx/' + k + '.mp3?v=5'); a.preload = 'auto'; return a; }); });
 const sndIdx = {};
 function snd(name, vol = 1) {
   if (sfxMute) return;
@@ -244,11 +244,31 @@ function drawSpr(name, x, y, sc, t, o = {}) {
   const m = FXM[name], img = IMG['fx_' + name]; if (!m || !img) return;
   let fr = Math.floor(t * 1000 / m.ms); fr = o.loop ? fr % m.n : Math.min(m.n - 1, fr);
   g.save(); g.globalCompositeOperation = 'lighter'; if (o.alpha != null) g.globalAlpha = o.alpha;
-  if (o.hue && 'filter' in g) g.filter = 'hue-rotate(' + o.hue + 'deg) saturate(1.4)';
+  const src = o.hue ? tintedStrip(name, o.hue) : img;
   g.translate(x, y); if (o.rot) g.rotate(o.rot); if (o.flip) g.scale(-1, 1);
-  g.drawImage(img, fr * m.w, 0, m.w, m.h, -m.w * sc / 2, -m.h * sc / 2, m.w * sc, m.h * sc);
+  g.drawImage(src, fr * m.w, 0, m.w, m.h, -m.w * sc / 2, -m.h * sc / 2, m.w * sc, m.h * sc);
   g.restore();
 }
+// Versiones teñidas de los efectos, calculadas UNA vez (ctx.filter en cada cuadro hace lagear a muchos celulares).
+const tintCache = {};
+function tintedStrip(name, hue) {
+  const key = name + '@' + hue; if (tintCache[key]) return tintCache[key];
+  const img = IMG['fx_' + name], c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+  try {
+    const d = x.getImageData(0, 0, c.width, c.height), px = d.data, a = hue * Math.PI / 180, co = Math.cos(a), si = Math.sin(a), sa = 1.4;
+    const H = [[0.213 + 0.787 * co - 0.213 * si, 0.715 - 0.715 * co - 0.715 * si, 0.072 - 0.072 * co + 0.928 * si], [0.213 - 0.213 * co + 0.143 * si, 0.715 + 0.285 * co + 0.140 * si, 0.072 - 0.072 * co - 0.283 * si], [0.213 - 0.213 * co - 0.787 * si, 0.715 - 0.715 * co + 0.715 * si, 0.072 + 0.928 * co + 0.072 * si]];
+    const S = [[0.213 + 0.787 * sa, 0.715 - 0.715 * sa, 0.072 - 0.072 * sa], [0.213 - 0.213 * sa, 0.715 + 0.285 * sa, 0.072 - 0.072 * sa], [0.213 - 0.213 * sa, 0.715 - 0.715 * sa, 0.072 + 0.928 * sa]];
+    const M = S.map(r => [0, 1, 2].map(j => r[0] * H[0][j] + r[1] * H[1][j] + r[2] * H[2][j]));
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], gg = px[i + 1], b = px[i + 2];
+      px[i] = M[0][0] * r + M[0][1] * gg + M[0][2] * b; px[i + 1] = M[1][0] * r + M[1][1] * gg + M[1][2] * b; px[i + 2] = M[2][0] * r + M[2][1] * gg + M[2][2] * b;
+    }
+    x.putImageData(d, 0, 0);
+  } catch (e) { }
+  return tintCache[key] = c;
+}
+function prewarmTints() { ['hit', 'orb', 'ki', 'charge'].forEach((n, i) => setTimeout(() => { if (IMG['fx_' + n]) tintedStrip(n, HUE.kunte); }, i * 400)); }
 const HUE = { kunte: 110, espa: 0 }; // los efectos son celestes; Kunte los ve fucsia
 
 // ---------- Estado ----------
@@ -833,7 +853,7 @@ window.addEventListener('resize', fit);
 function loop(now) { const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; update(dt); render(); requestAnimationFrame(loop); }
 
 (async function boot() {
-  fit(); requestAnimationFrame(loop);
+  fit(); requestAnimationFrame(loop); setTimeout(prewarmTints, 1500);
   try { META = await (await fetch('assets/meta.json?v=14')).json(); } catch (e) { }
   await Promise.all([
     ...['kunte', 'espa'].flatMap(c => ['guard', 'attack', 'block', 'hit', 'win1', 'win2'].map(p => loadImg(c + '_' + p, 'assets/' + c + '_' + p + '.png?v=14'))),

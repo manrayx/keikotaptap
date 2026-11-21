@@ -422,7 +422,7 @@ function rivalUpdate(dt) {
 // ---------- Peligros ----------
 function hazards(dt) {
   const k = STAGES[stageIdx].key; hz.t += dt;
-  if (k === 'rusia' && Math.random() < dt * 50) parts.push({ x: Math.random() * W, y: SCENE_Y, vx: -20 + Math.random() * 20, vy: 60 + Math.random() * 80, life: 12, t: 0, col: '#fff', sz: 2 + Math.random() * 3, snow: 1 });
+  if (k === 'rusia' && Math.random() < dt * (perfLow ? 14 : 50)) parts.push({ x: Math.random() * W, y: SCENE_Y, vx: -20 + Math.random() * 20, vy: 60 + Math.random() * 80, life: 12, t: 0, col: '#fff', sz: 2 + Math.random() * 3, snow: 1 });
   if (k === 'casa' && Math.random() < dt * 1.2) fx.push({ k: 'book', x: Math.random() < 0.5 ? -20 : W + 20, y: SCENE_Y + 80 + Math.random() * 180, t: 0, d: 2.4, col: ['#c0392b', '#2e86de', '#27ae60', '#f39c12'][Math.floor(Math.random() * 4)] });
   if (k === 'tauro') {
     if (hz.t > hz.next) { hz.dark = 1.8; hz.next = hz.t + 6 + Math.random() * 3; say('¡SE FUE LA LUZ!', '#ff3fd2'); SFX.apagon(); }
@@ -510,14 +510,20 @@ function txt(t, x, y, size, col = '#fff', align = 'center', stroke = 6) {
   g.font = size + 'px "Press Start 2P", monospace'; g.textAlign = align; g.lineJoin = 'round';
   g.lineWidth = stroke; g.strokeStyle = '#000'; g.strokeText(t, x, y); g.fillStyle = col; g.fillText(t, x, y);
 }
+const bgCache = {};
+function bgScaled(key, full, anchorX, img) {
+  const k = key + (full ? 'F' : 'S') + anchorX; if (bgCache[k]) return bgCache[k];
+  const ah = full ? H : SCENE_H, c = document.createElement('canvas'); c.width = W; c.height = ah;
+  const x = c.getContext('2d'), sc = Math.max(W / img.width, ah / img.height), w = img.width * sc, h = img.height * sc;
+  x.drawImage(img, (W - w) * anchorX, ah - h, w, h);
+  return bgCache[k] = c;
+}
 function drawBG(key, dim = 0, full = false, anchorX = 0.5) {
   const img = IMG['bg_' + key];
   g.fillStyle = '#12061f'; g.fillRect(0, 0, W, H);
   if (img) {
     const y0 = full ? 0 : SCENE_Y, ah = full ? H : SCENE_H;
-    const sc = Math.max(W / img.width, ah / img.height), w = img.width * sc, h = img.height * sc;
-    g.save(); g.beginPath(); g.rect(0, y0, W, ah); g.clip();
-    g.drawImage(img, (W - w) * anchorX, y0 + ah - h, w, h); g.restore();
+    g.drawImage(bgScaled(key, full, anchorX, img), 0, y0);
     if (!full) { g.fillStyle = '#ff3fd2'; g.fillRect(0, y0 + ah, W, 3); }
   }
   if (dim) { g.fillStyle = `rgba(10,0,25,${dim})`; g.fillRect(0, 0, W, H); }
@@ -646,7 +652,7 @@ function render() {
     if (e.k === 'spr') { drawSpr(e.name, e.x, e.y, e.sc, e.t, e); return; }
     if (e.k === 'ki') {
       const xe = e.x0 + (e.x1 - e.x0) * p, ye = e.y0 + (e.y1 - e.y0) * p;
-      for (let k = 5; k >= 1; k--) { const q = Math.max(0, p - k * 0.06); drawSpr('orb', e.x0 + (e.x1 - e.x0) * q, e.y0 + (e.y1 - e.y0) * q, (e.small ? 0.5 : 0.9) * (1 - k * 0.12), T, { loop: true, alpha: 0.5 - k * 0.08, hue: e.hue }); }
+      for (let k = perfLow ? 2 : 5; k >= 1; k--) { const q = Math.max(0, p - k * 0.06); drawSpr('orb', e.x0 + (e.x1 - e.x0) * q, e.y0 + (e.y1 - e.y0) * q, (e.small ? 0.5 : 0.9) * (1 - k * 0.12), T, { loop: true, alpha: 0.5 - k * 0.08, hue: e.hue }); }
       drawSpr('orb', xe, ye, e.small ? 0.8 : 1.5, T, { loop: true, hue: e.hue });
       drawSpr('ki', xe - (e.x1 > e.x0 ? 40 : -40), ye, 0.9, e.t, { rot: e.x1 > e.x0 ? -0.6 : 2.5, hue: e.hue, alpha: 0.8 });
       return;
@@ -850,7 +856,15 @@ function fit() {
   const wrap = $('wrap'); wrap.style.width = W * s + 'px'; wrap.style.height = H * s + 'px'; wrap.style.setProperty('--s', s);
 }
 window.addEventListener('resize', fit);
-function loop(now) { const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; update(dt); render(); requestAnimationFrame(loop); }
+// Límite de ~60 cuadros (en pantallas de 90/120 Hz se hacía el doble de trabajo) y modo ligero si el teléfono va lento.
+let perfLow = false, perfAcc = 0, perfN = 0;
+function loop(now) {
+  const raw = (now - last) / 1000 || 0;
+  if (raw < 0.0145) { requestAnimationFrame(loop); return; }
+  const dt = Math.min(0.05, raw); last = now;
+  if (state === 'fight') { perfAcc += raw; if (++perfN >= 90) { perfLow = perfAcc / perfN > 0.026; perfAcc = 0; perfN = 0; } }
+  update(dt); render(); requestAnimationFrame(loop);
+}
 
 (async function boot() {
   fit(); requestAnimationFrame(loop); setTimeout(prewarmTints, 1500);

@@ -6,6 +6,7 @@ Plataforma de juegos de sátira política en pixel art de MNRY (mantarraya.pe), 
 |---|---|
 | `/` | Portada: todos los juegos, ideas por Yape y encargos para marcas |
 | `/ridiculo/` | ¡Ridículo Total! (El Canciller Ridi). Fuente editable fuera del repo: se genera con `build.py --web` |
+| `/farmeando/` | Farmeando Cringe (Espá vs. Kunte). Top ten vía API en farmeando-cringe.onrender.com; fuente: repo pruebas, carpeta farmeando |
 | `/palafoto/` | Pala Foto |
 | `/arcade/` | Keiko Arcade |
 | `/pastora/` | Pastora Invaders |

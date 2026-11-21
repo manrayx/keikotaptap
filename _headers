@@ -10,3 +10,5 @@
   Cache-Control: public, max-age=3600
 /ridiculo/assets/*
   Cache-Control: public, max-age=3600
+/farmeando/assets/*
+  Cache-Control: public, max-age=3600

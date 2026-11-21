@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Farmeando Cringe · Combate de huachafería</title>
+<meta name="description" content="Caos Espá vs. Vaguez Kunte: róbale la pinta a tu rival con rayos de aura. Cuatro escenarios, un top ten y cero vergüenza.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Farmeando Cringe · Combate de huachafería">
+<meta property="og:description" content="Caos Espá vs. Vaguez Kunte: róbale la pinta a tu rival con rayos de aura. ¿Entras al top ten?">
+<meta property="og:image" content="https://keikotaptap.com/farmeando/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://keikotaptap.com/farmeando/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#12061f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:#12061f;overflow:hidden;font-family:"Press Start 2P",monospace;color:#fff;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  body{display:flex;align-items:center;justify-content:center}
+  #wrap{position:relative}
+  #cv{width:100%;height:100%;display:block;image-rendering:auto}
+  #pad{position:absolute;left:0;right:0;top:calc(668px*var(--s));bottom:calc(12px*var(--s));display:none;grid-template-columns:1fr 1fr;gap:calc(12px*var(--s));padding:0 calc(12px*var(--s))}
+  #pad button{font-family:inherit;font-size:calc(20px*var(--s));color:#fff;border-radius:calc(22px*var(--s));touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(10px*var(--s));box-shadow:0 calc(8px*var(--s)) 0 rgba(0,0,0,.5)}
+  #pad .r{background:#5a0f4a;border:calc(5px*var(--s)) solid #ff3fd2}
+  #pad .b{background:#0b2d55;border:calc(5px*var(--s)) solid #4db8ff}
+  #pad .ic{font-size:calc(64px*var(--s));line-height:1}
+  #pad small{font-size:calc(9px*var(--s));opacity:.7;font-family:inherit}
+  #pad button.on{transform:translateY(calc(6px*var(--s)));box-shadow:0 calc(2px*var(--s)) 0 rgba(0,0,0,.5)}
+  #pad .r.on{background:#ff3fd2}#pad .b.on{background:#4db8ff}
+  #pad .meter{width:72%;height:calc(9px*var(--s));background:rgba(0,0,0,.4);border-radius:calc(5px*var(--s));overflow:hidden;border:calc(1px*var(--s)) solid rgba(255,255,255,.3)}
+  #pad .meter i{display:block;height:100%;width:100%;background:#fff;border-radius:calc(5px*var(--s))}
+  #pad .r .meter i{background:#ff3fd2}
+  #pad .b .meter i{background:#4db8ff}
+  #pad button.locked .meter i{background:#ff4d6d}
+  #pad button.low .meter i{background:#555}
+  .panel{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:calc(14px*var(--s));padding:calc(20px*var(--s));text-align:center}
+  .panel h2{margin:0;font-size:calc(24px*var(--s));color:#ffd400;text-shadow:3px 3px 0 #000}
+  .panel p{margin:0;font-size:calc(12px*var(--s));line-height:1.6}
+  .big{font-size:calc(36px*var(--s));color:#7cf6ff;text-shadow:4px 4px 0 #000}
+  input{font-family:inherit;font-size:calc(18px*var(--s));padding:calc(12px*var(--s));width:calc(420px*var(--s));text-align:center;background:#000;color:#ffd400;border:calc(3px*var(--s)) solid #ff3fd2;border-radius:calc(8px*var(--s));text-transform:uppercase}
+  .btn{font-family:inherit;font-size:calc(13px*var(--s));padding:calc(12px*var(--s)) calc(18px*var(--s));background:#ff3fd2;color:#000;border:0;border-radius:calc(8px*var(--s));cursor:pointer}
+  .btn.alt{background:#25d366}
+  .btn.ghost{background:transparent;color:#fff;border:calc(2px*var(--s)) solid #fff}
+  .err{color:#ff6b81;font-size:calc(10px*var(--s));min-height:1em}
+  #toplist{list-style:none;margin:0;padding:0;width:calc(500px*var(--s));font-size:calc(12px*var(--s))}
+  #toplist li{display:grid;grid-template-columns:calc(40px*var(--s)) 1fr calc(130px*var(--s));gap:calc(8px*var(--s));padding:calc(6px*var(--s)) calc(10px*var(--s));background:rgba(0,0,0,.55);margin-bottom:calc(4px*var(--s));text-align:left}
+  #toplist li:nth-child(1){color:#ffd400}
+  #toplist li.me{background:#ff3fd2;color:#000}
+  #toplist .sc{text-align:right}#toplist .who{opacity:.7}
+  #toplist .empty{display:block;text-align:center}
+  .row{display:flex;gap:calc(10px*var(--s));flex-wrap:wrap;justify-content:center}
+  .btn.yape{background:#ffd400;animation:beat 1.2s infinite}
+  @keyframes beat{50%{box-shadow:0 0 calc(24px*var(--s)) calc(4px*var(--s)) #ffd400}}
+  .credit{font-size:calc(9px*var(--s));color:#ccc;text-decoration:none}.credit b{color:#ffd400}
+  .modal{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#0d0418e6;padding:calc(24px*var(--s))}
+  .modal[hidden]{display:none}
+  .modal .card{background:#2a0a3a;border:calc(4px*var(--s)) solid #ffd400;border-radius:calc(16px*var(--s));padding:calc(20px*var(--s));display:flex;flex-direction:column;gap:calc(12px*var(--s));align-items:center;text-align:center}
+  .modal h2{margin:0;font-size:calc(18px*var(--s));color:#ffd400}
+  .modal .lead{margin:0;font-family:system-ui,sans-serif;font-weight:700;font-size:calc(15px*var(--s))}
+  .modal .hint{margin:0;font-family:system-ui,sans-serif;font-size:calc(12px*var(--s));color:#d9c7ff}
+  .modal .qr{width:calc(300px*var(--s));aspect-ratio:1;background:#fff;border-radius:calc(8px*var(--s));-webkit-touch-callout:default;user-select:auto}
+  #mute,#toptitle{position:absolute;top:calc(8px*var(--s));font-family:inherit;font-size:calc(12px*var(--s));background:rgba(0,0,0,.5);color:#fff;border:calc(2px*var(--s)) solid #fff;border-radius:calc(6px*var(--s));padding:calc(6px*var(--s)) calc(10px*var(--s))}
+  #mute{left:calc(10px*var(--s))}
+  #toptitle{right:calc(10px*var(--s))}
+  #rotate{position:fixed;inset:0;background:#12061f;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-size:14px;text-align:center;padding:20px;z-index:9;line-height:1.7}
+  #rotate b{font-size:40px;display:block;animation:rot 1.5s infinite}
+  @keyframes rot{50%{transform:rotate(90deg)}}
+</style>
+<script>window.goatcounter = { path: function () { return '/farmeando'; } };</script>
+<script data-goatcounter="https://manrayx.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" width="540" height="960"></canvas>
+  <div id="pad">
+    <button id="btnBlock" class="b"><div class="meter"><i id="blockBar"></i></div><span class="ic">🛡</span>BLOQUEAR<small>aguanta 2 segundos · tecla ←</small></button>
+    <button id="btnRay" class="r"><div class="meter"><i id="rayBar"></i></div><span class="ic">⚡</span>RAYO<small>róbale la ropa · tecla →</small></button>
+  </div>
+  <button id="toptitle">TOP 10</button>
+  <button id="mute">♪ ON</button>
+  <form class="panel" id="namebox" autocomplete="off">
+    <h2>FIN DEL COMBATE</h2>
+    <p id="finalmsg"></p>
+    <div class="big" id="finalscore">0</div>
+    <p>Escribe tu nombre para el top ten</p>
+    <input id="nm" maxlength="12" placeholder="TU NOMBRE" enterkeyhint="send">
+    <div class="err" id="nameerr"></div>
+    <div class="row"><button class="btn" id="send" type="submit">GUARDAR</button></div>
+  </form>
+  <div class="panel" id="topbox">
+    <h2>TOP 10 · MÁS CRINGE</h2>
+    <ol id="toplist"></ol>
+    <div class="row" style="flex-direction:column">
+      <button class="btn" id="again">JUGAR OTRA VEZ</button>
+      <button class="btn alt" id="share">COMPARTIR EN WHATSAPP</button>
+      <button class="btn yape" id="yapeBtn">♥ APOYA EL CRINGE · con tu Yape</button>
+      <button class="btn ghost" id="mnryBtn">★ ¿UN JUEGO PARA TU MARCA? · MNRY</button>
+    </div>
+    <a class="credit" href="https://mantarraya.pe" target="_blank" rel="noopener">Desarrollado por <b>MNRY</b> · mantarraya.pe</a>
+  </div>
+  <div id="support" class="modal" hidden>
+    <div class="card" role="dialog" aria-label="Apoya el cringe">
+      <h2>♥ APOYA EL CRINGE ♥</h2>
+      <p class="lead">Tu yapeo es el auspicio que necesitamos para seguir haciendo juegos como este.</p>
+      <img id="supQr" src="assets/yape-qr.png" alt="Código QR para yapear. Tócalo para guardarlo." class="qr" role="button" tabindex="0">
+      <p class="hint">Toca el QR para guardarlo. Luego, en Yape, elige <b>Escanear</b> y sube la imagen desde tu galería.</p>
+      <button id="supSave" class="btn" type="button">GUARDAR QR</button>
+      <button id="supCl" class="btn ghost" type="button">CERRAR</button>
+    </div>
+  </div>
+</div>
+<script src="game.js?v=27"></script>
+</body>
+</html>

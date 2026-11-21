@@ -110,6 +110,7 @@ const KUNTE_R2_SND = new Audio('assets/audio/kunte_pierde_r2.mp3'); KUNTE_R2_SND
 const KUNTE_TAURO_SND = new Audio('assets/audio/kunte_pierde_tauro.mp3'); KUNTE_TAURO_SND.preload = 'auto'; KUNTE_TAURO_SND.volume = 0.95;
 const ESPA_CASA_SND = new Audio('assets/audio/espa_pierde_casa.mp3'); ESPA_CASA_SND.preload = 'auto'; ESPA_CASA_SND.volume = 0.95;
 const ESPA_MISA_SND = new Audio('assets/audio/espa_pierde_misa.mp3'); ESPA_MISA_SND.preload = 'auto'; ESPA_MISA_SND.volume = 0.95;
+const KUNTE_RUSIA_SND = new Audio('assets/audio/kunte_pierde_rusia.mp3'); KUNTE_RUSIA_SND.preload = 'auto'; KUNTE_RUSIA_SND.volume = 0.95;
 const ESPA_R3_SND = new Audio('assets/audio/espa_pierde_r3.mp3'); ESPA_R3_SND.preload = 'auto'; ESPA_R3_SND.volume = 0.9;
 let lastOutfitWarned = false;
 function checkLastOutfit(f) {
@@ -497,6 +498,7 @@ function endRound() {
   if (won) score += lives(P) * 150 + 1000;
   setTimeout(() => {
     if (state !== 'ko') return;
+    if (loser.char === 'kunte' && stageIdx === 0 && musicOn && userStarted) { try { KUNTE_RUSIA_SND.currentTime = 0; KUNTE_RUSIA_SND.play().catch(() => { }); return; } catch (_) { } }
     if (loser.char === 'kunte' && stageIdx === 1 && musicOn && userStarted) { try { KUNTE_R2_SND.currentTime = 0; KUNTE_R2_SND.play().catch(() => { }); return; } catch (_) { } }
     if (loser.char === 'kunte' && stageIdx === 2 && musicOn && userStarted) { try { KUNTE_TAURO_SND.currentTime = 0; KUNTE_TAURO_SND.play().catch(() => { }); return; } catch (_) { } }
     if (loser.char === 'espa' && stageIdx === 1 && musicOn && userStarted) { try { ESPA_CASA_SND.currentTime = 0; ESPA_CASA_SND.play().catch(() => { }); return; } catch (_) { } }

@@ -510,9 +510,13 @@ function endRound() {
   if (won && stageIdx === STAGES.length - 1) setTimeout(() => { if (state === 'ko') SFX.final(); }, 1300);
   setState('ko');
 }
+// Acceso VIP: solo tras ganar la Misa, junto a los créditos. Se pide el código cada vez (no se guarda).
+let vipEligible = false, vipUnlocked = false;
+const VIP_CODE = 'encerrona';
+function normCode(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
 function afterKO() {
   if (result && stageIdx < STAGES.length - 1) { stageIdx++; startStage(); }
-  else { runSecs = (performance.now() - runStart) / 1000; crowdLoop(false); setState('name'); playMusic('title'); }
+  else { runSecs = (performance.now() - runStart) / 1000; vipEligible = !!result && stageIdx === STAGES.length - 1; vipUnlocked = false; $('vipBtn').textContent = '★ VIP'; crowdLoop(false); setState('name'); playMusic('title'); }
 }
 
 // ---------- Dibujo ----------
@@ -733,7 +737,16 @@ function render() {
   }
   if (state === 'ko') {
     g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, SCENE_Y + 80, W, 140);
-    txt(result ? '¡HUACHAFO CAMPEÓN!' : '¡TE CALATEÓ!', W / 2, SCENE_Y + 150, 34, result ? '#ffd400' : '#ff4d6d', 'center', 8);
+    const wimg = IMG.ui_win;
+    if (result && wimg) {
+      // Texto de victoria: entra con zoom (impacto), luego un pequeño temblor; ocupa como máximo ~74% del ancho para no salirse.
+      const t = stateT, k = t < 0.18 ? 1.25 - 0.25 * (t / 0.18) : 1;
+      const shake = t > 0.18 && t < 0.7 ? Math.sin(t * 55) * 3 * (1 - (t - 0.18) / 0.52) : 0;
+      const bw = 0.62 * W * k, bh = bw * wimg.height / wimg.width;
+      g.save(); g.globalAlpha = Math.min(1, t / 0.08);
+      g.drawImage(wimg, W / 2 - bw / 2 + shake, SCENE_Y + 150 - bh / 2, bw, bh);
+      g.restore();
+    } else txt(result ? '¡HUACHAFO CAMPEÓN!' : '¡TE CALATEÓ!', W / 2, SCENE_Y + 150, 34, result ? '#ffd400' : '#ff4d6d', 'center', 8);
     if (stateT > 1.1) txt(result ? (stageIdx < 3 ? 'Le robaste ' + stolenStage + ' prendas' : '¡GANASTE LA MISA!') : 'Te dejaron sin ropa', W / 2, SCENE_Y + 195, 12, '#fff');
   }
   g.restore();
@@ -773,6 +786,7 @@ function drawSelect() {
 function updateUI() {
   $('pad').style.display = state === 'fight' || state === 'intro' || state === 'ko' ? 'grid' : 'none';
   $('namebox').style.display = state === 'name' ? 'flex' : 'none';
+  $('vipWrap').style.display = state === 'top' && vipEligible ? 'block' : 'none';
   $('topbox').style.display = state === 'top' ? 'flex' : 'none';
   const menu = state === 'title' || state === 'select' || state === 'top' || state === 'name';
   $('mute').style.display = menu ? 'block' : 'none';
@@ -783,6 +797,8 @@ function updateUI() {
     $('nameerr').textContent = '';
   }
 }
+$('vipBtn').addEventListener('click', () => { if (vipUnlocked) return; $('vipBox').style.display = $('vipBox').style.display === 'none' ? 'block' : 'none'; $('vipCode').focus(); });
+$('vipBox').addEventListener('submit', e => { e.preventDefault(); if (normCode($('vipCode').value) === VIP_CODE) { vipUnlocked = true; $('vipBox').style.display = 'none'; $('vipBtn').textContent = '★ VIP · DESBLOQUEADO'; $('vipMsg').textContent = ''; } else { $('vipMsg').textContent = 'Código incorrecto'; } $('vipCode').value = ''; });
 const API = /keikotaptap|mantarraya/.test(location.hostname) ? 'https://farmeando-cringe.onrender.com' : '';
 async function loadTop() { try { const r = await fetch(API + '/api/top'); topList = await r.json(); } catch (e) { topList = []; } renderTop(); }
 function renderTop() {
@@ -890,11 +906,13 @@ function loop(now) {
     loadImg('moya_strip', 'assets/fx/moya.png?v=1'),
     loadImg('kunte_win', 'assets/kunte_win.png'), loadImg('espa_win', 'assets/espa_win.png'),
     loadImg('bg_lima', 'assets/bg_lima.jpg?v=14'),
+    loadImg('ui_win', 'assets/ui_win.png?v=1'),
     ...STAGES.map(s => loadImg('bg_' + s.key, 'assets/bg_' + s.key + '.jpg')),
     document.fonts ? document.fonts.load('20px "Press Start 2P"') : null,
   ]);
   SEL.kunte = newFighter('kunte', 1, 1); SEL.espa = newFighter('espa', -1, 1);
   window.__fc = {
+    vip: (v) => { vipEligible = v; setState('top'); }, vipState: () => ({ e: vipEligible, u: vipUnlocked }),
     ko: () => { if (R) { R.slots = [null, null, null, null]; R.closet = []; } }, st: () => R && R.st, state: () => state,
     swap: () => { if (P && R) { [1, 2, 3].forEach(s => { const t = P.slots[s]; P.slots[s] = R.slots[s]; R.slots[s] = t; }); P.dirty = true; R.dirty = true; } },
     pose: (who, p, d) => { const f = who === 'P' ? P : R; if (f) setPose(f, p, d || 3); },

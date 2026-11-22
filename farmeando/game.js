@@ -874,6 +874,7 @@ document.addEventListener('keydown', ev => {
   if (k === ' ' || k === 'enter') { ev.preventDefault(); startAudio(); if (state === 'title') setState('select'); else if (state === 'select') startRun(); }
 });
 $('namebox').addEventListener('submit', submitName);
+$('skipName').addEventListener('click', () => { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); });
 $('again').addEventListener('click', () => { myEntry = null; setState('select'); playMusic('title'); });
 $('share').addEventListener('click', shareWA);
 $('mute').addEventListener('click', () => { musicOn = !musicOn; sfxMute = !musicOn; $('mute').textContent = musicOn ? '♪ ON' : '♪ OFF'; if (musicOn) { userStarted = true; const k = curMusic; curMusic = null; playMusic(k || 'title'); if (crowdAud && state === 'fight' && STAGES[stageIdx].key === 'misa') crowdAud.play().catch(() => { }); } else { Object.values(MUS).forEach(a => a.pause()); if (crowdAud) crowdAud.pause(); } });

@@ -736,18 +736,19 @@ function render() {
     else txt('¡A FARMEAR CRINGE!', W / 2, SCENE_Y + 170, 26, '#ff3fd2');
   }
   if (state === 'ko') {
-    g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, SCENE_Y + 80, W, 140);
+    // Banner arriba de la escena para no tapar al ganador (que se centra y se agranda al reír).
+    g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, SCENE_Y + 8, W, 132);
     const wimg = IMG.ui_win;
     if (result && wimg) {
-      // Texto de victoria: entra con zoom (impacto), luego un pequeño temblor; ocupa como máximo ~74% del ancho para no salirse.
+      // Texto de victoria: entra con zoom (impacto), luego un pequeño temblor; ocupa como máximo ~70% del ancho para no salirse.
       const t = stateT, k = t < 0.18 ? 1.25 - 0.25 * (t / 0.18) : 1;
       const shake = t > 0.18 && t < 0.7 ? Math.sin(t * 55) * 3 * (1 - (t - 0.18) / 0.52) : 0;
-      const bw = 0.62 * W * k, bh = bw * wimg.height / wimg.width;
+      const bw = 0.56 * W * k, bh = bw * wimg.height / wimg.width;
       g.save(); g.globalAlpha = Math.min(1, t / 0.08);
-      g.drawImage(wimg, W / 2 - bw / 2 + shake, SCENE_Y + 150 - bh / 2, bw, bh);
+      g.drawImage(wimg, W / 2 - bw / 2 + shake, SCENE_Y + 74 - bh / 2, bw, bh);
       g.restore();
-    } else txt(result ? '¡HUACHAFO CAMPEÓN!' : '¡TE CALATEÓ!', W / 2, SCENE_Y + 150, 34, result ? '#ffd400' : '#ff4d6d', 'center', 8);
-    if (stateT > 1.1) txt(result ? (stageIdx < 3 ? 'Le robaste ' + stolenStage + ' prendas' : '¡GANASTE LA MISA!') : 'Te dejaron sin ropa', W / 2, SCENE_Y + 195, 12, '#fff');
+    } else txt(result ? '¡HUACHAFO CAMPEÓN!' : '¡TE CALATEÓ!', W / 2, SCENE_Y + 70, 30, result ? '#ffd400' : '#ff4d6d', 'center', 8);
+    if (stateT > 1.1) txt(result ? (stageIdx < 3 ? 'Le robaste ' + stolenStage + ' prendas' : '¡GANASTE LA MISA!') : 'Te dejaron sin ropa', W / 2, SCENE_Y + 126, 12, '#fff');
   }
   g.restore();
 }

@@ -94,7 +94,7 @@ const SFX = {
 };
 const MUS = {}, ANN = {};
 let curMusic = null;
-['title', 'rusia', 'casa', 'tauro', 'misa', 'secret'].forEach(k => { const a = new Audio('assets/audio/m_' + k + '.mp3'); a.loop = true; a.preload = 'none'; a.volume = 0.45; MUS[k] = a; });
+['title', 'rusia', 'casa', 'tauro', 'misa', 'secret', 'secretvid'].forEach(k => { const a = new Audio('assets/audio/m_' + k + '.mp3'); a.loop = true; a.preload = 'none'; a.volume = 0.45; MUS[k] = a; });
 ['1', '2', '3', '4', 'bonus'].forEach(k => { const a = new Audio('assets/audio/a_' + k + '.mp3'); a.preload = 'auto'; ANN[k] = a; });
 function playMusic(k) {
   Object.entries(MUS).forEach(([kk, a]) => { if (kk !== k) a.pause(); });
@@ -317,9 +317,9 @@ function say(text, col = '#ffd400', big = false) { msgs.push({ text, col, t: 0, 
 function slotY(f, slot) {
   const m = PM(f.char, 'guard');
   const fy = [m.top + 12, (m.torso[0] + m.torso[1]) / 2, (m.legs[0] + m.legs[1]) / 2, m.feetY + 10][slot];
-  return GROUND - (META.fh - fy) * FS;
+  return GROUND - (META.fh - fy) * fsc();
 }
-function handPos(f) { const m = PM(f.char, 'attack'); return { x: f.x + (f.side < 0 ? 1 : -1) * (m.hand[0] - META.fw * AX) * FS, y: GROUND - (META.fh - m.hand[1]) * FS }; }
+function handPos(f) { const m = PM(f.char, 'attack'); return { x: f.x + (f.side < 0 ? 1 : -1) * (m.hand[0] - META.fw * AX) * fsc(), y: GROUND - (META.fh - m.hand[1]) * fsc() }; }
 function chestPos(f) { return { x: f.x + (f.side < 0 ? 18 : -18), y: slotY(f, 1) - 20 }; }
 function setPose(f, pose, d) { f.pose = pose; f.poseT = d; }
 function curPose(f) {
@@ -536,7 +536,7 @@ function playSecretVideo() {
   const v = $('secretVid'), fl = $('flashFx');
   v.onended = finishSecret; v.onerror = finishSecret;
   placeSecretOverlay();
-  playMusic('secret'); if (crowdAud) crowdAud.pause();
+  playMusic('secretvid'); if (crowdAud) crowdAud.pause();
   // Flash de cámara solo en la zona de acción; el video entra en el destello.
   fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
   setTimeout(() => {
@@ -565,6 +565,15 @@ function txt(t, x, y, size, col = '#fff', align = 'center', stroke = 6) {
 const bgCache = {};
 function bgScaled(key, full, anchorX, img) {
   const k = key + (full ? 'F' : 'S') + anchorX; if (bgCache[k]) return bgCache[k];
+  if (key === 'palacio' && !full) {
+    // Foto vertical: se muestra completo el público (desde las sillas hacia arriba) y el piso.
+    const ah = SCENE_H, c = document.createElement('canvas'); c.width = W; c.height = ah;
+    const x = c.getContext('2d'), sy = 640, sh = img.height - sy, s = ah / sh, dw = img.width * s, dx = (W - dw) / 2;
+    x.drawImage(img, 0, sy, img.width, sh, dx, 0, dw, ah);
+    x.drawImage(img, 0, sy, 1, sh, 0, 0, dx + 1, ah);
+    x.drawImage(img, img.width - 1, sy, 1, sh, dx + dw - 1, 0, W - dx - dw + 2, ah);
+    return bgCache[k] = c;
+  }
   const ah = full ? H : SCENE_H, c = document.createElement('canvas'); c.width = W; c.height = ah;
   const x = c.getContext('2d'), sc = Math.max(W / img.width, ah / img.height), w = img.width * sc, h = img.height * sc;
   x.drawImage(img, (W - w) * anchorX, ah - h, w, h);
@@ -580,6 +589,8 @@ function drawBG(key, dim = 0, full = false, anchorX = 0.5) {
   }
   if (dim) { g.fillStyle = `rgba(10,0,25,${dim})`; g.fillRect(0, 0, W, H); }
 }
+// Escala de los luchadores: un poco más grandes en el nivel oculto.
+function fsc() { return secret ? FS * 1.22 : FS; }
 function drawFighter(f) {
   if (!f) return;
   if (f.ko) {
@@ -587,7 +598,7 @@ function drawFighter(f) {
       const t = f.fly.t;
       if (t < 1.7) {
         const cvs = comp(f, 'hit');
-        const w = META.fw * FS, h = META.fh * FS, ax = META.fw * AX * FS;
+        const w = META.fw * fsc(), h = META.fh * fsc(), ax = META.fw * AX * fsc();
         const alpha = t > 1.2 ? Math.max(0, 1 - (t - 1.2) / 0.5) : 1;
         g.save(); g.globalAlpha = alpha; g.translate(f.x + f.fly.x, GROUND + f.fly.y); g.rotate(f.fly.rot); if (f.side > 0) g.scale(-1, 1);
         g.drawImage(cvs, -ax, -h, w, h);
@@ -605,7 +616,7 @@ function drawFighter(f) {
     const cvs = comp(f, bounce ? 'win2' : 'win1');
     const cx = f.x + (W / 2 - f.x) * prog;
     const sc = 1 + 0.25 * prog;
-    const w = META.fw * FS * sc, h = META.fh * FS * sc, ax = META.fw * AX * FS * sc;
+    const w = META.fw * fsc() * sc, h = META.fh * fsc() * sc, ax = META.fw * AX * fsc() * sc;
     const bobY = bounce ? -14 : 0;
     g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(cx, GROUND - 3, 60 * sc, 11, 0, 0, 6.3); g.fill();
     g.save(); g.translate(cx, GROUND + bobY); if (f.side > 0) g.scale(-1, 1);
@@ -617,7 +628,7 @@ function drawFighter(f) {
   const pose = curPose(f);
   if (pose !== f.lastPose) { f.squash = 1; f.lastPose = pose; }
   const cvs = comp(f, pose);
-  const w = META.fw * FS, h = META.fh * FS, ax = META.fw * AX * FS;
+  const w = META.fw * fsc(), h = META.fh * fsc(), ax = META.fw * AX * fsc();
   const dir = f.side < 0 ? 1 : -1;
   const kick = pose === 'attack' ? 26 : pose === 'hit' ? -22 : pose === 'block' ? -6 : 0;
   const lx = dir * (f.lunge * 12 + kick * Math.min(1, f.squash * 2 + 0.6)) + (f.hurt ? (Math.random() - 0.5) * 8 * f.hurt : 0);

@@ -513,22 +513,35 @@ function endRound() {
   }, 550);
   if (won && stageIdx === STAGES.length - 1) setTimeout(() => { if (state === 'ko') SFX.final(); }, 1300);
   setState('ko');
+  if (secret && won) setTimeout(() => { if (state === 'ko' && secret) playSecretVideo(); }, 60);
 }
 // Acceso VIP: solo tras ganar la Misa, junto a los créditos. Se pide el código cada vez (no se guarda).
 let vipEligible = false, vipUnlocked = false;
 const VIP_CODE = 'encerrona';
 function normCode(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
 function startSecret() { if (!vipUnlocked) return; secret = true; secretVidOn = false; startRun(); }
+// Coloca el video y el flash solo sobre la zona de acción (la escena), no sobre el HUD ni la botonera.
+function placeSecretOverlay() {
+  const r = cv.getBoundingClientRect(), k = r.width / W;
+  const box = { left: r.left, top: r.top + SCENE_Y * k, width: W * k, height: SCENE_H * k };
+  for (const id of ['secretVid', 'flashFx']) {
+    const el = $(id);
+    el.style.position = 'fixed'; el.style.left = box.left + 'px'; el.style.top = box.top + 'px';
+    el.style.width = box.width + 'px'; el.style.height = box.height + 'px'; el.style.inset = 'auto';
+  }
+}
+window.addEventListener('resize', () => { if (secretVidOn) placeSecretOverlay(); });
 function playSecretVideo() {
   secretVidOn = true;
   const v = $('secretVid'), fl = $('flashFx');
   v.onended = finishSecret; v.onerror = finishSecret;
+  placeSecretOverlay();
   playMusic('secret'); if (crowdAud) crowdAud.pause();
-  // Flash de cámara en toda la pantalla; el video entra justo en el destello para cortar la continuidad.
+  // Flash de cámara solo en la zona de acción; el video entra en el destello.
   fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
   setTimeout(() => {
     if (!secret) return;
-    v.muted = true; v.src = 'assets/secret_' + pick + '.mp4'; v.style.display = 'block';
+    v.muted = true; v.style.objectFit = 'cover'; v.src = 'assets/secret_' + pick + '.mp4'; v.style.display = 'block';
     v.play().catch(finishSecret);
   }, 160);
 }
@@ -829,7 +842,7 @@ function drawSelect() {
 function updateUI() {
   $('pad').style.display = state === 'fight' || state === 'intro' || state === 'ko' ? 'grid' : 'none';
   $('namebox').style.display = state === 'name' ? 'flex' : 'none';
-  $('vipWrap').style.display = state === 'top' && vipEligible ? 'block' : 'none';
+  $('vipWrap').style.display = state === 'top' ? 'block' : 'none';
   $('topbox').style.display = state === 'top' ? 'flex' : 'none';
   const menu = state === 'title' || state === 'select' || state === 'top' || state === 'name';
   $('mute').style.display = menu ? 'block' : 'none';

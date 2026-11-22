@@ -304,7 +304,7 @@ function newFighter(c, side, look) {
   return f;
 }
 function lives(f) { return f.closet.length + f.slots.filter(Boolean).length; }
-function startRun() { if (!secret) { secretSum = null; secretBase = null; } score = 0; stageIdx = 0; stolenTotal = 0; moya.shown = false; moya.active = false; runStart = performance.now(); startStage(); }
+function startRun() { if (!secret) { secretSum = null; secretBase = null; savedEntry = null; } score = 0; stageIdx = 0; stolenTotal = 0; moya.shown = false; moya.active = false; runStart = performance.now(); startStage(); }
 function startStage() { lastOutfitWarned = false;
   P = newFighter(pick, -1, stageIdx + 1); R = newFighter(other(pick), 1, ((stageIdx + 2) % 4) + 1);
   fx = []; parts = []; msgs = []; combo = 0; shake = 0; flash = 0; stolenStage = 0;
@@ -523,8 +523,8 @@ let vipEligible = false, vipUnlocked = false;
 const VIP_CODE = 'encerrona';
 function normCode(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
 // El nivel secreto suma al puntaje del juego que se acaba de ganar.
-let secretBase = null, secretSum = null;
-function startSecret() { if (!vipUnlocked) return; secretBase = secretBase || { score, stolen: stolenTotal, secs: runSecs, stage: stageIdx }; secretSum = null; secret = true; secretVidOn = false; startRun(); }
+let secretBase = null, secretSum = null, savedEntry = null; // savedEntry: id + token del puntaje que se guardó al ganar la Misa
+function startSecret() { if (!vipUnlocked) return; secretBase = secretBase || { score, stolen: stolenTotal, secs: runSecs, stage: stageIdx, saved: savedEntry }; secretSum = null; secret = true; secretVidOn = false; startRun(); }
 // Coloca el video y el flash solo sobre la zona de acción (la escena), no sobre el HUD ni la botonera.
 // La capa del video y el flash van dentro de #wrap, con porcentajes: no hay que medir nada.
 function placeSecretOverlay() { }
@@ -558,7 +558,7 @@ function finishSecret() {
   crowdLoop(false); playMusic('title');
   // Pantalla de suma: juego + nivel secreto = total, y de ahí al ranking (guardar nombre o seguir sin nombre).
   const b = secretBase || { score: 0, stolen: 0, secs: 0, stage: STAGES.length - 1 };
-  secretSum = { base: b.score, secret: secPts, won: !!result };
+  secretSum = { base: b.score, secret: secPts, won: !!result, replace: b.saved || null };
   score = b.score + secPts; stolenTotal += b.stolen; runSecs = b.secs + secSecs; stageIdx = b.stage;
   secretBase = null; vipEligible = false; vipUnlocked = false; $('vipBtn').textContent = '★ VIP';
   setState('name');
@@ -919,10 +919,11 @@ async function submitName(e) {
   if (!name) { $('nameerr').textContent = 'Escribe tu nombre primero'; return; }
   $('send').disabled = true;
   try {
-    const r = await fetch(API + '/api/score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, score, fighter: pick, stage: stageIdx + 1, dur: runSecs }) });
+    const r = await fetch(API + '/api/score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ name, score, fighter: pick, stage: stageIdx + 1, dur: runSecs }, secretSum && secretSum.replace ? { replaceId: secretSum.replace.id, replaceToken: secretSum.replace.token } : {})) });
     const d = await r.json();
     if (!r.ok) { $('nameerr').textContent = d.error || 'No se pudo guardar'; $('send').disabled = false; return; }
     myEntry = { name: name.slice(0, 12), score }; topList = d.top; renderTop();
+    savedEntry = d.id && d.token ? { id: d.id, token: d.token } : null;
     try { localStorage.setItem('fc_name', name); } catch (_) { }
     setState('top');
     if (musicOn && userStarted) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } }

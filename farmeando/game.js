@@ -259,7 +259,8 @@ function drawSpr(name, x, y, sc, t, o = {}) {
   g.save(); g.globalCompositeOperation = 'lighter'; if (o.alpha != null) g.globalAlpha = o.alpha;
   const src = o.hue ? tintedStrip(name, o.hue) : img;
   g.translate(x, y); if (o.rot) g.rotate(o.rot); if (o.flip) g.scale(-1, 1);
-  g.drawImage(src, fr * m.w, 0, m.w, m.h, -m.w * sc / 2, -m.h * sc / 2, m.w * sc, m.h * sc);
+  const cols = m.cols || m.n; // las tiras van en cuadrícula (máx. 2048 px de ancho: límite de muchos celulares)
+  g.drawImage(src, (fr % cols) * m.w, Math.floor(fr / cols) * m.h, m.w, m.h, -m.w * sc / 2, -m.h * sc / 2, m.w * sc, m.h * sc);
   g.restore();
 }
 // Versiones teñidas de los efectos, calculadas UNA vez (ctx.filter en cada cuadro hace lagear a muchos celulares).
@@ -569,9 +570,29 @@ function afterKO() {
 }
 
 // ---------- Dibujo ----------
+const txtCache = new Map();
+let fontReady = false;
 function txt(t, x, y, size, col = '#fff', align = 'center', stroke = 6) {
-  g.font = size + 'px "Press Start 2P", monospace'; g.textAlign = align; g.lineJoin = 'round';
-  g.lineWidth = stroke; g.strokeStyle = '#000'; g.strokeText(t, x, y); g.fillStyle = col; g.fillText(t, x, y);
+  t = String(t);
+  if (!fontReady && document.fonts && document.fonts.check) fontReady = document.fonts.check('20px "Press Start 2P"');
+  if (!fontReady) {
+    g.font = size + 'px "Press Start 2P", monospace'; g.textAlign = align; g.lineJoin = 'round';
+    g.lineWidth = stroke; g.strokeStyle = '#000'; g.strokeText(t, x, y); g.fillStyle = col; g.fillText(t, x, y); return;
+  }
+  const key = t + '|' + size + '|' + col + '|' + stroke;
+  let c = txtCache.get(key);
+  if (!c) {
+    const f = size + 'px "Press Start 2P", monospace';
+    g.font = f; const w = Math.ceil(g.measureText(t).width), pad = Math.ceil(stroke / 2) + 2;
+    c = document.createElement('canvas'); c.width = Math.max(1, w + pad * 2); c.height = Math.ceil(size * 1.5 + pad * 2);
+    const x2 = c.getContext('2d'); x2.font = f; x2.textAlign = 'left'; x2.lineJoin = 'round'; x2.lineWidth = stroke; x2.strokeStyle = '#000';
+    c.bx = pad; c.by = pad + Math.ceil(size * 1.15);
+    x2.strokeText(t, c.bx, c.by); x2.fillStyle = col; x2.fillText(t, c.bx, c.by); c.tw = w;
+    if (txtCache.size > 400) txtCache.delete(txtCache.keys().next().value);
+    txtCache.set(key, c);
+  }
+  const ox = align === 'center' ? c.tw / 2 : align === 'right' || align === 'end' ? c.tw : 0;
+  g.drawImage(c, Math.round(x - ox - c.bx), Math.round(y - c.by));
 }
 const bgCache = {};
 function bgScaled(key, full, anchorX, img) {
@@ -768,14 +789,14 @@ function render() {
   if (hz.water > 0) { g.fillStyle = `rgba(90,180,255,${hz.water * 0.45})`; g.fillRect(0, SCENE_Y, W, SCENE_H); for (let i = 0; i < 40; i++) { g.fillStyle = 'rgba(200,240,255,0.8)'; g.fillRect(Math.random() * W, SCENE_Y + Math.random() * SCENE_H, 3, 18); } }
   if (flash > 0) { g.globalAlpha = flash * 0.6; g.fillStyle = flashCol; g.fillRect(0, 0, W, H); g.globalAlpha = 1; }
   if (moya.active && IMG.moya_strip) {
-    const img = IMG.moya_strip, cw = img.width / MOYA_FRAMES, ch = img.height;
+    const img = IMG.moya_strip, cw = 165, ch = 180, mc = Math.floor(img.width / cw);
     const fr = Math.min(MOYA_FRAMES - 1, Math.floor(moya.t * 1000 / MOYA_MS));
     // Busto (del pecho para arriba) pegado a la esquina inferior derecha de la escena: el corte queda en el borde.
     const dh = 230, dw = cw * dh / ch, bottom = SCENE_Y + SCENE_H;
     const e = Math.min(1, moya.t / 0.25), out = Math.min(1, Math.max(0, (MOYA_DUR - moya.t) / 0.25));
     const rise = (1 - Math.min(e, out)) * (1 - Math.min(e, out)) * dh;
     g.save(); g.beginPath(); g.rect(0, SCENE_Y, W, SCENE_H); g.clip();
-    g.drawImage(img, fr * cw, 0, cw, ch, W - dw * 158 / 165, bottom - dh + rise, dw, dh);
+    g.drawImage(img, (fr % mc) * cw, Math.floor(fr / mc) * ch, cw, ch, W - dw * 158 / 165, bottom - dh + rise, dw, dh);
     g.restore();
   }
   if (state === 'fight' && P.stun > T) { g.fillStyle = 'rgba(90,90,100,0.35)'; g.fillRect(0, SCENE_Y, W, SCENE_H); }
@@ -989,15 +1010,15 @@ function loop(now) {
       ...['sonrisa', 'grito', 'serio', 'sonrisilla'].map(fn => loadImg(c + '_' + pose + '_face_' + fn, 'assets/silo/' + c + '_' + pose + '_face_' + fn + '.png?v=21')),
       ...[0, 1, 2, 3, 4].flatMap(i => [loadImg(c + '_' + pose + '_saco_' + i, 'assets/silo/' + c + '_' + pose + '_saco_' + i + '.png?v=21'), loadImg(c + '_' + pose + '_panta_' + i, 'assets/silo/' + c + '_' + pose + '_panta_' + i + '.png?v=21')])
     ])),
-    fetch('assets/fx/fx.json?v=7').then(r => r.json()).then(j => { FXM = j; return Promise.all(Object.keys(j).map(k => loadImg('fx_' + k, 'assets/fx/' + k + '.png?v=7'))); }).catch(() => { }),
+    fetch('assets/fx/fx.json?v=8').then(r => r.json()).then(j => { FXM = j; return Promise.all(Object.keys(j).map(k => loadImg('fx_' + k, 'assets/fx/' + k + '.png?v=8'))); }).catch(() => { }),
     loadImg('kunte_ko', 'assets/kunte_ko.png'), loadImg('espa_ko', 'assets/espa_ko.png'),
-    loadImg('moya_strip', 'assets/fx/moya.png?v=1'),
+    loadImg('moya_strip', 'assets/fx/moya.png?v=2'),
     loadImg('kunte_win', 'assets/kunte_win.png'), loadImg('espa_win', 'assets/espa_win.png'),
-    loadImg('bg_lima', 'assets/bg_lima.jpg?v=14'),
+    loadImg('bg_lima', 'assets/bg_lima.jpg?v=15'),
     loadImg('ui_win', 'assets/ui_win.png?v=1'),
-    loadImg('logo', 'assets/logo_title.png?v=1'),
+    loadImg('logo', 'assets/logo_title.png?v=2'),
     ...STAGES.map(s => loadImg('bg_' + s.key, 'assets/bg_' + s.key + '.jpg')),
-    loadImg('bg_palacio', 'assets/bg_palacio.jpg?v=1'),
+    loadImg('bg_palacio', 'assets/bg_palacio.jpg?v=2'),
     document.fonts ? document.fonts.load('20px "Press Start 2P"') : null,
   ]);
   SEL.kunte = newFighter('kunte', 1, 1); SEL.espa = newFighter('espa', -1, 1);

@@ -104,6 +104,8 @@ function playMusic(k) {
   const a = MUS[k]; if (!a) return; a.currentTime = 0; a.play().catch(() => { });
 }
 function announce(k) { if (!musicOn || !userStarted) return; const a = ANN[k]; if (!a) return; try { a.currentTime = 0; a.play().catch(() => { }); } catch (_) { } }
+// Nivel secreto: audio del beso volado, 2 s antes del cierre del video.
+const BESO_SND = new Audio('assets/audio/beso.mp3'); BESO_SND.preload = 'auto'; BESO_SND.volume = 1;
 const RANK_SND = new Audio('assets/audio/peruano.mp3'); RANK_SND.preload = 'none'; RANK_SND.volume = 0.7;
 // Sonido de derrota: cuando el jugador pierde la partida.
 const LOSE_SND = new Audio('assets/audio/pierde.mp3'); LOSE_SND.preload = 'auto'; LOSE_SND.volume = 0.9;
@@ -529,7 +531,12 @@ function playSecretVideo() {
   const v = $('secretVid'), fl = $('flashFx');
   v.onended = finishSecret; v.onerror = finishSecret;
   // Se corta 1 segundo antes del final del video.
-  v.ontimeupdate = () => { if (v.duration && v.currentTime >= v.duration - 1) finishSecret(); };
+  let besoOn = false;
+  v.ontimeupdate = () => {
+    if (!v.duration) return;
+    if (!besoOn && v.currentTime >= v.duration - 3) { besoOn = true; if (musicOn && userStarted) { try { BESO_SND.currentTime = 0; BESO_SND.play().catch(() => { }); } catch (_) { } } }
+    if (v.currentTime >= v.duration - 1) finishSecret();
+  };
   placeSecretOverlay();
   playMusic('secretvid'); if (crowdAud) crowdAud.pause();
   // Flash de cámara solo en la zona de acción; el video entra en el destello.
@@ -926,7 +933,7 @@ document.addEventListener('keydown', ev => {
   if (k === ' ' || k === 'enter') { ev.preventDefault(); startAudio(); if (state === 'title') setState('select'); else if (state === 'select') startRun(); }
 });
 $('namebox').addEventListener('submit', submitName);
-function goRankingMenu() { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); }
+function goRankingMenu() { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted && BESO_SND.paused) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); }
 $('skipName').addEventListener('click', goRankingMenu);
 $('again').addEventListener('click', () => { myEntry = null; setState('select'); playMusic('title'); });
 $('share').addEventListener('click', shareWA);

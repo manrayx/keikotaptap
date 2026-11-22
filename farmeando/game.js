@@ -830,7 +830,6 @@ function updateUI() {
   $('pad').style.display = state === 'fight' || state === 'intro' || state === 'ko' ? 'grid' : 'none';
   $('namebox').style.display = state === 'name' ? 'flex' : 'none';
   $('vipWrap').style.display = state === 'top' && vipEligible ? 'block' : 'none';
-  $('secretBtn').style.display = state === 'top' && vipUnlocked ? 'inline-block' : 'none';
   $('topbox').style.display = state === 'top' ? 'flex' : 'none';
   const menu = state === 'title' || state === 'select' || state === 'top' || state === 'name';
   $('mute').style.display = menu ? 'block' : 'none';
@@ -841,9 +840,8 @@ function updateUI() {
     $('nameerr').textContent = '';
   }
 }
-$('secretBtn').addEventListener('click', () => { startAudio(); startSecret(); });
-$('vipBtn').addEventListener('click', () => { if (vipUnlocked) return; $('vipBox').style.display = $('vipBox').style.display === 'none' ? 'block' : 'none'; $('vipCode').focus(); });
-$('vipBox').addEventListener('submit', e => { e.preventDefault(); if (normCode($('vipCode').value) === VIP_CODE) { vipUnlocked = true; $('vipBox').style.display = 'none'; $('vipBtn').textContent = '★ VIP · DESBLOQUEADO'; $('vipMsg').textContent = ''; } else { $('vipMsg').textContent = 'Código incorrecto'; } $('vipCode').value = ''; });
+$('vipBtn').addEventListener('click', () => { if (vipUnlocked) { startAudio(); startSecret(); return; } $('vipBox').style.display = $('vipBox').style.display === 'none' ? 'block' : 'none'; $('vipCode').focus(); });
+$('vipBox').addEventListener('submit', e => { e.preventDefault(); if (normCode($('vipCode').value) === VIP_CODE) { vipUnlocked = true; $('vipBox').style.display = 'none'; $('vipBtn').textContent = 'JUGAR NIVEL OCULTO'; $('vipMsg').textContent = ''; } else { $('vipMsg').textContent = 'Código incorrecto'; } $('vipCode').value = ''; });
 const API = /keikotaptap|mantarraya/.test(location.hostname) ? 'https://farmeando-cringe.onrender.com' : '';
 async function loadTop() { try { const r = await fetch(API + '/api/top'); topList = await r.json(); } catch (e) { topList = []; } renderTop(); }
 function renderTop() {
@@ -893,6 +891,12 @@ cv.addEventListener('pointerdown', ev => {
 });
 function bindBtn(id, fn) { const b = $(id); b.addEventListener('pointerdown', ev => { ev.preventDefault(); startAudio(); fn(); b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 110); }); }
 bindBtn('btnRay', rayo); bindBtn('btnBlock', bloquear);
+// Evita el zoom del navegador al tocar rápido los botones (doble toque / pellizco sobre la botonera).
+document.querySelectorAll('#pad').forEach(p => {
+  p.addEventListener('touchend', e => { e.preventDefault(); }, { passive: false });
+  p.addEventListener('dblclick', e => e.preventDefault());
+});
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
 document.addEventListener('keydown', ev => {
   if (state === 'name') return;
   const k = ev.key.toLowerCase();

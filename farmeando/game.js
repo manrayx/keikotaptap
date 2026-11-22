@@ -751,16 +751,33 @@ function render() {
   }
   g.restore();
 }
+let LOGO_CV = null;
+function drawLogo(cx, cy, w) {
+  if (!IMG.logo) return;
+  const h = w * IMG.logo.height / IMG.logo.width;
+  if (!LOGO_CV) {
+    LOGO_CV = document.createElement('canvas');
+    LOGO_CV.width = 940; LOGO_CV.height = Math.round(940 * IMG.logo.height / IMG.logo.width);
+    LOGO_CV.lc = LOGO_CV.getContext('2d');
+  }
+  const c = LOGO_CV.lc, lw = LOGO_CV.width, lh = LOGO_CV.height;
+  c.clearRect(0, 0, lw, lh); c.drawImage(IMG.logo, 0, 0, lw, lh);
+  const sx = ((T * 0.5) % 1.8 - 0.4) * lw;
+  c.globalCompositeOperation = 'source-atop';
+  const gr = c.createLinearGradient(sx - lw * 0.15, 0, sx + lw * 0.15, lh);
+  gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, 'rgba(255,255,255,0.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  c.fillStyle = gr; c.fillRect(0, 0, lw, lh);
+  c.globalCompositeOperation = 'source-over';
+  const pulse = 1 + Math.sin(T * 2.2) * 0.012;
+  g.save(); g.translate(cx, cy + Math.sin(T * 1.6) * 5); g.rotate(Math.sin(T * 1.2) * 0.012); g.scale(pulse, pulse);
+  g.drawImage(LOGO_CV, -w / 2, -h / 2, w, h); g.restore();
+}
 function drawTitle() {
   drawBG('lima', 0.55, true);
   const kk = IMG.kunte_win, ee = IMG.espa_win;
   if (ee) { const h = 300, w = ee.width * h / ee.height; g.drawImage(ee, 20, 740 - h, w, h); }
   if (kk) { const h = 300, w = kk.width * h / kk.height; g.save(); g.translate(W - 20, 740 - h); g.scale(-1, 1); g.drawImage(kk, 0, 0, w, h); g.restore(); }
-  g.save(); g.translate(W / 2, 200); g.rotate(Math.sin(T * 2) * 0.02);
-  txt('FARMEANDO', 0, -20, 40, '#ff3fd2', 'center', 9);
-  txt('CRINGE', 0, 46, 54, '#ffd400', 'center', 9);
-  g.restore();
-  txt('Combate de huachafería', W / 2, 300, 13, '#fff', 'center', 4);
+  drawLogo(W / 2, 200, 470);
   if (Math.floor(T * 2) % 2 === 0) txt('TOCA PARA JUGAR', W / 2, 810, 18, '#7cf6ff');
   txt('RAYO: róbale la ropa y póntela', W / 2, 856, 10, '#fff', 'center', 3);
   txt('BLOQUEAR: cuando brilla en rojo', W / 2, 878, 10, '#fff', 'center', 3);
@@ -907,6 +924,7 @@ function loop(now) {
     loadImg('kunte_win', 'assets/kunte_win.png'), loadImg('espa_win', 'assets/espa_win.png'),
     loadImg('bg_lima', 'assets/bg_lima.jpg?v=14'),
     loadImg('ui_win', 'assets/ui_win.png?v=1'),
+    loadImg('logo', 'assets/logo_title.png?v=1'),
     ...STAGES.map(s => loadImg('bg_' + s.key, 'assets/bg_' + s.key + '.jpg')),
     document.fonts ? document.fonts.load('20px "Press Start 2P"') : null,
   ]);

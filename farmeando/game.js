@@ -528,6 +528,8 @@ function playSecretVideo() {
   secretVidOn = true;
   const v = $('secretVid'), fl = $('flashFx');
   v.onended = finishSecret; v.onerror = finishSecret;
+  // Se corta 1 segundo antes del final del video.
+  v.ontimeupdate = () => { if (v.duration && v.currentTime >= v.duration - 1) finishSecret(); };
   placeSecretOverlay();
   playMusic('secretvid'); if (crowdAud) crowdAud.pause();
   // Flash de cámara solo en la zona de acción; el video entra en el destello.
@@ -541,8 +543,10 @@ function playSecretVideo() {
 function finishSecret() {
   if (!secret) return;
   secret = false; secretVidOn = false;
-  const v = $('secretVid'); v.pause(); v.style.display = 'none'; v.removeAttribute('src');
-  runSecs = (performance.now() - runStart) / 1000; crowdLoop(false); setState('name'); playMusic('title');
+  const v = $('secretVid'); v.ontimeupdate = null; v.pause(); v.style.display = 'none'; v.removeAttribute('src');
+  runSecs = (performance.now() - runStart) / 1000; crowdLoop(false); playMusic('title');
+  // Directo al ranking con el menú final (jugar de nuevo, compartir, Yape, marca).
+  goRankingMenu();
 }
 function afterKO() {
   if (secret) { if (result && !secretVidOn) playSecretVideo(); else if (!result) finishSecret(); return; }
@@ -922,7 +926,8 @@ document.addEventListener('keydown', ev => {
   if (k === ' ' || k === 'enter') { ev.preventDefault(); startAudio(); if (state === 'title') setState('select'); else if (state === 'select') startRun(); }
 });
 $('namebox').addEventListener('submit', submitName);
-$('skipName').addEventListener('click', () => { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); });
+function goRankingMenu() { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); }
+$('skipName').addEventListener('click', goRankingMenu);
 $('again').addEventListener('click', () => { myEntry = null; setState('select'); playMusic('title'); });
 $('share').addEventListener('click', shareWA);
 $('mute').addEventListener('click', () => { musicOn = !musicOn; sfxMute = !musicOn; $('mute').textContent = musicOn ? '♪ ON' : '♪ OFF'; if (musicOn) { userStarted = true; const k = curMusic; curMusic = null; playMusic(k || 'title'); if (crowdAud && state === 'fight' && curSt().key === 'misa') crowdAud.play().catch(() => { }); } else { Object.values(MUS).forEach(a => a.pause()); if (crowdAud) crowdAud.pause(); } });

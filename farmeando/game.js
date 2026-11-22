@@ -521,15 +521,8 @@ const VIP_CODE = 'encerrona';
 function normCode(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
 function startSecret() { if (!vipUnlocked) return; secret = true; secretVidOn = false; startRun(); }
 // Coloca el video y el flash solo sobre la zona de acción (la escena), no sobre el HUD ni la botonera.
-function placeSecretOverlay() {
-  const r = cv.getBoundingClientRect(), k = r.width / W;
-  const box = { left: r.left, top: r.top + SCENE_Y * k, width: W * k, height: SCENE_H * k };
-  for (const id of ['secretVid', 'flashFx']) {
-    const el = $(id);
-    el.style.position = 'fixed'; el.style.left = box.left + 'px'; el.style.top = box.top + 'px';
-    el.style.width = box.width + 'px'; el.style.height = box.height + 'px'; el.style.inset = 'auto';
-  }
-}
+// La capa del video y el flash van dentro de #wrap, con porcentajes: no hay que medir nada.
+function placeSecretOverlay() { }
 window.addEventListener('resize', () => { if (secretVidOn) placeSecretOverlay(); });
 function playSecretVideo() {
   secretVidOn = true;

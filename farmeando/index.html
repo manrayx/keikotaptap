@@ -68,7 +68,8 @@
   #rotate{position:fixed;inset:0;background:#12061f;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-size:14px;text-align:center;padding:20px;z-index:9;line-height:1.7}
   #rotate b{font-size:40px;display:block;animation:rot 1.5s infinite}
   @keyframes rot{50%{transform:rotate(90deg)}}
-#flashFx{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:60}
+#flashFx{position:absolute;left:0;width:100%;top:18.75%;height:48.9583%;background:#fff;opacity:0;pointer-events:none;z-index:60}
+  #secretVid{display:none;position:absolute;left:0;width:100%;top:18.75%;height:48.9583%;object-fit:cover;background:#000;z-index:50}
 #flashFx.go{animation:camflash .7s ease-out}
 @keyframes camflash{0%{opacity:0}6%{opacity:1}14%{opacity:.15}22%{opacity:.9}100%{opacity:0}}
 </style>
@@ -78,6 +79,8 @@
 <body>
 <div id="wrap">
   <canvas id="cv" width="540" height="960"></canvas>
+  <div id="flashFx"></div>
+  <video id="secretVid" playsinline preload="auto"></video>
   <div id="pad">
     <button id="btnBlock" class="b"><div class="meter"><i id="blockBar"></i></div><span class="ic">🛡</span>BLOQUEAR<small>aguanta 2 segundos · tecla ←</small></button>
     <button id="btnRay" class="r"><div class="meter"><i id="rayBar"></i></div><span class="ic">⚡</span>RAYO<small>róbale la ropa · tecla →</small></button>
@@ -123,8 +126,7 @@
     </div>
   </div>
 </div>
-<div id="flashFx"></div>
-<video id="secretVid" playsinline preload="auto" style="display:none;position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#000;z-index:50"></video>
-<script src="game.js?v=55"></script>
+
+<script src="game.js?v=56"></script>
 </body>
 </html>

@@ -303,7 +303,7 @@ function newFighter(c, side, look) {
   return f;
 }
 function lives(f) { return f.closet.length + f.slots.filter(Boolean).length; }
-function startRun() { score = 0; stageIdx = 0; stolenTotal = 0; moya.shown = false; moya.active = false; runStart = performance.now(); startStage(); }
+function startRun() { if (!secret) { secretSum = null; secretBase = null; } score = 0; stageIdx = 0; stolenTotal = 0; moya.shown = false; moya.active = false; runStart = performance.now(); startStage(); }
 function startStage() { lastOutfitWarned = false;
   P = newFighter(pick, -1, stageIdx + 1); R = newFighter(other(pick), 1, ((stageIdx + 2) % 4) + 1);
   fx = []; parts = []; msgs = []; combo = 0; shake = 0; flash = 0; stolenStage = 0;
@@ -521,7 +521,9 @@ function endRound() {
 let vipEligible = false, vipUnlocked = false;
 const VIP_CODE = 'encerrona';
 function normCode(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
-function startSecret() { if (!vipUnlocked) return; secret = true; secretVidOn = false; startRun(); }
+// El nivel secreto suma al puntaje del juego que se acaba de ganar.
+let secretBase = null, secretSum = null;
+function startSecret() { if (!vipUnlocked) return; secretBase = secretBase || { score, stolen: stolenTotal, secs: runSecs, stage: stageIdx }; secretSum = null; secret = true; secretVidOn = false; startRun(); }
 // Coloca el video y el flash solo sobre la zona de acción (la escena), no sobre el HUD ni la botonera.
 // La capa del video y el flash van dentro de #wrap, con porcentajes: no hay que medir nada.
 function placeSecretOverlay() { }
@@ -551,9 +553,14 @@ function finishSecret() {
   if (!secret) return;
   secret = false; secretVidOn = false;
   const v = $('secretVid'); v.ontimeupdate = null; v.pause(); v.style.display = 'none'; v.removeAttribute('src');
-  runSecs = (performance.now() - runStart) / 1000; crowdLoop(false); playMusic('title');
-  // Directo al ranking con el menú final (jugar de nuevo, compartir, Yape, marca).
-  goRankingMenu();
+  const secPts = score, secSecs = (performance.now() - runStart) / 1000;
+  crowdLoop(false); playMusic('title');
+  // Pantalla de suma: juego + nivel secreto = total, y de ahí al ranking (guardar nombre o seguir sin nombre).
+  const b = secretBase || { score: 0, stolen: 0, secs: 0, stage: STAGES.length - 1 };
+  secretSum = { base: b.score, secret: secPts, won: !!result };
+  score = b.score + secPts; stolenTotal += b.stolen; runSecs = b.secs + secSecs; stageIdx = b.stage;
+  secretBase = null; vipEligible = false; vipUnlocked = false; $('vipBtn').textContent = '★ VIP';
+  setState('name');
 }
 function afterKO() {
   if (secret) { if (result && !secretVidOn) playSecretVideo(); else if (!result) finishSecret(); return; }
@@ -864,7 +871,9 @@ function updateUI() {
   $('toptitle').style.display = state === 'title' || state === 'select' ? 'block' : 'none';
   if (state === 'name') {
     $('finalscore').textContent = score.toLocaleString('es-PE');
-    $('finalmsg').textContent = (result && stageIdx === 3 ? '¡Sobreviviste a la Misa del Papa!' : 'Llegaste hasta: ' + curSt().name) + ' · Prendas robadas: ' + stolenTotal;
+    $('nametitle').textContent = secretSum ? (secretSum.won ? '¡NIVEL SECRETO SUPERADO!' : 'FIN DEL NIVEL SECRETO') : 'FIN DEL COMBATE';
+    if (secretSum) $('finalmsg').textContent = 'Juego: ' + secretSum.base.toLocaleString('es-PE') + ' + Nivel secreto: ' + secretSum.secret.toLocaleString('es-PE') + ' = TOTAL';
+    else $('finalmsg').textContent = (result && stageIdx === 3 ? '¡Sobreviviste a la Misa del Papa!' : 'Llegaste hasta: ' + curSt().name) + ' · Prendas robadas: ' + stolenTotal;
     $('nameerr').textContent = '';
   }
 }
@@ -935,7 +944,7 @@ document.addEventListener('keydown', ev => {
 $('namebox').addEventListener('submit', submitName);
 function goRankingMenu() { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted && BESO_SND.paused) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); }
 $('skipName').addEventListener('click', goRankingMenu);
-$('again').addEventListener('click', () => { myEntry = null; setState('select'); playMusic('title'); });
+$('again').addEventListener('click', () => { myEntry = null; secretSum = null; secretBase = null; setState('select'); playMusic('title'); });
 $('share').addEventListener('click', shareWA);
 $('mute').addEventListener('click', () => { musicOn = !musicOn; sfxMute = !musicOn; $('mute').textContent = musicOn ? '♪ ON' : '♪ OFF'; if (musicOn) { userStarted = true; const k = curMusic; curMusic = null; playMusic(k || 'title'); if (crowdAud && state === 'fight' && curSt().key === 'misa') crowdAud.play().catch(() => { }); } else { Object.values(MUS).forEach(a => a.pause()); if (crowdAud) crowdAud.pause(); } });
 $('toptitle').addEventListener('click', () => { showTop(); });

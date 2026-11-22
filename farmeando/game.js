@@ -14,6 +14,10 @@ const STAGES = [
   { key: 'tauro', name: 'CINE TAURO', sub: 'Función de medianoche', idle: [0.42, 0.85], guard: [0.6, 1.1], charge: 0.58, feint: 0.25, stun: 0.9, atk: 0.58, dbl: 0.12, regen: 14.5, bgAnchor: 0.9 },
   { key: 'misa', name: 'LA MISA DEL PAPA', sub: 'Las Palmas · caos total', idle: [0.3, 0.65], guard: [0.45, 0.9], charge: 0.46, feint: 0.4, stun: 0.7, atk: 0.66, dbl: 0.3, regen: 12.5 },
 ];
+// Nivel secreto (solo por VIP): Palacio de Gobierno, tuning del segundo nivel (casa), sonidos del segundo nivel.
+const SECRET_STAGE = { key: 'palacio', mus: 'secret', name: 'PALACIO DE GOBIERNO', sub: 'Sala dorada · el congreso mira', idle: [0.5, 1.0], guard: [0.7, 1.2], charge: 0.72, feint: 0.1, stun: 1.05, atk: 0.52, dbl: 0, regen: 15.5 };
+let secret = false, secretVidOn = false;
+function curSt() { return secret ? SECRET_STAGE : STAGES[stageIdx]; }
 const ROUND_TIME = 60, CLOSET = 5;
 const CHARS = {
   kunte: { name: 'VAGUEZ KUNTE', short: 'KUNTE', aura: '#ff3fd2', accs: ['panama', 'boina', 'gorra', 'chullo', 'vaquero'] },
@@ -90,7 +94,7 @@ const SFX = {
 };
 const MUS = {}, ANN = {};
 let curMusic = null;
-['title', 'rusia', 'casa', 'tauro', 'misa'].forEach(k => { const a = new Audio('assets/audio/m_' + k + '.mp3'); a.loop = true; a.preload = 'none'; a.volume = 0.45; MUS[k] = a; });
+['title', 'rusia', 'casa', 'tauro', 'misa', 'secret'].forEach(k => { const a = new Audio('assets/audio/m_' + k + '.mp3'); a.loop = true; a.preload = 'none'; a.volume = 0.45; MUS[k] = a; });
 ['1', '2', '3', '4', 'bonus'].forEach(k => { const a = new Audio('assets/audio/a_' + k + '.mp3'); a.preload = 'auto'; ANN[k] = a; });
 function playMusic(k) {
   Object.entries(MUS).forEach(([kk, a]) => { if (kk !== k) a.pause(); });
@@ -303,8 +307,8 @@ function startStage() { lastOutfitWarned = false;
   fx = []; parts = []; msgs = []; combo = 0; shake = 0; flash = 0; stolenStage = 0;
   timeLeft = ROUND_TIME; hz = { t: 0, next: 7 + Math.random() * 3 };
   setState('intro');
-  playMusic(STAGES[stageIdx].key);
-  crowdLoop(STAGES[stageIdx].key === 'misa');
+  playMusic(curSt().mus || curSt().key);
+  crowdLoop(curSt().key === 'misa');
   setTimeout(() => announce(String(stageIdx + 1)), 350);
 }
 function setState(s) { if (state === 'top' && s !== 'top') { try { RANK_SND.pause(); } catch (_) { } } state = s; stateT = 0; updateUI(); }
@@ -401,7 +405,7 @@ function burst(x, y, col) { for (let i = 0; i < 14; i++) { const a = Math.random
 
 // ---------- IA del rival ----------
 function rivalUpdate(dt) {
-  const st = STAGES[stageIdx], r = R;
+  const st = curSt(), r = R;
   r.stT += dt;
   if (r.st === 'charge' && r.feint && r.stT > r.stDur * 0.45) { r.st = 'guard'; r.stT = 0; r.stDur = 0.6; r.feint = false; return; }
   if (r.stT < r.stDur) return;
@@ -428,7 +432,7 @@ function rivalUpdate(dt) {
 
 // ---------- Peligros ----------
 function hazards(dt) {
-  const k = STAGES[stageIdx].key; hz.t += dt;
+  const k = curSt().key; hz.t += dt;
   if (k === 'rusia' && Math.random() < dt * (perfLow ? 14 : 50)) parts.push({ x: Math.random() * W, y: SCENE_Y, vx: -20 + Math.random() * 20, vy: 60 + Math.random() * 80, life: 12, t: 0, col: '#fff', sz: 2 + Math.random() * 3, snow: 1 });
   if (k === 'casa' && Math.random() < dt * 1.2) fx.push({ k: 'book', x: Math.random() < 0.5 ? -20 : W + 20, y: SCENE_Y + 80 + Math.random() * 180, t: 0, d: 2.4, col: ['#c0392b', '#2e86de', '#27ae60', '#f39c12'][Math.floor(Math.random() * 4)] });
   if (k === 'tauro') {
@@ -459,7 +463,7 @@ function update(dt) {
   if (state === 'fight') {
     timeLeft = Math.max(0, timeLeft - dt);
     rivalUpdate(dt); hazards(dt);
-    P.energy = Math.min(100, P.energy + dt * STAGES[stageIdx].regen);
+    P.energy = Math.min(100, P.energy + dt * curSt().regen);
     const pl = P.slots.some(Boolean) || P.closet.length, rl = R.slots.some(Boolean) || R.closet.length;
     if (!pl || !rl || timeLeft <= 0) endRound();
   }
@@ -502,7 +506,7 @@ function endRound() {
   setTimeout(() => {
     if (state !== 'ko') return;
     // Primero el lamento del perdedor; la risa del ganador entra después, cuando aparece su sprite riendo (ver update()).
-    const lament = { kunte: [KUNTE_RUSIA_SND, KUNTE_R2_SND, KUNTE_TAURO_SND, KUNTE_MISA_SND], espa: [ESPA_RUSIA_SND, ESPA_CASA_SND, ESPA_R3_SND, ESPA_MISA_SND] }[loser.char][stageIdx];
+    const lament = { kunte: [KUNTE_RUSIA_SND, KUNTE_R2_SND, KUNTE_TAURO_SND, KUNTE_MISA_SND], espa: [ESPA_RUSIA_SND, ESPA_CASA_SND, ESPA_R3_SND, ESPA_MISA_SND] }[loser.char][secret ? 1 : stageIdx];
     if (lament && musicOn && userStarted) { try { lament.currentTime = 0; lament.play().catch(() => { }); return; } catch (_) { } }
     if (loser === P) { if (musicOn && userStarted) { try { LOSE_SND.currentTime = 0; LOSE_SND.play().catch(() => SFX.lose()); } catch (_) { SFX.lose(); } } else SFX.lose(); }
     else SFX.lose();
@@ -514,7 +518,28 @@ function endRound() {
 let vipEligible = false, vipUnlocked = false;
 const VIP_CODE = 'encerrona';
 function normCode(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
+function startSecret() { if (!vipUnlocked) return; secret = true; secretVidOn = false; startRun(); }
+function playSecretVideo() {
+  secretVidOn = true;
+  const v = $('secretVid'), fl = $('flashFx');
+  v.onended = finishSecret; v.onerror = finishSecret;
+  playMusic('secret'); if (crowdAud) crowdAud.pause();
+  // Flash de cámara en toda la pantalla; el video entra justo en el destello para cortar la continuidad.
+  fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+  setTimeout(() => {
+    if (!secret) return;
+    v.muted = true; v.src = 'assets/secret_' + pick + '.mp4'; v.style.display = 'block';
+    v.play().catch(finishSecret);
+  }, 160);
+}
+function finishSecret() {
+  if (!secret) return;
+  secret = false; secretVidOn = false;
+  const v = $('secretVid'); v.pause(); v.style.display = 'none'; v.removeAttribute('src');
+  runSecs = (performance.now() - runStart) / 1000; crowdLoop(false); setState('name'); playMusic('title');
+}
 function afterKO() {
+  if (secret) { if (result && !secretVidOn) playSecretVideo(); else if (!result) finishSecret(); return; }
   if (result && stageIdx < STAGES.length - 1) { stageIdx++; startStage(); }
   else { runSecs = (performance.now() - runStart) / 1000; vipEligible = !!result && stageIdx === STAGES.length - 1; vipUnlocked = false; $('vipBtn').textContent = '★ VIP'; crowdLoop(false); setState('name'); playMusic('title'); }
 }
@@ -646,7 +671,7 @@ function drawHUD0() {
   txt(CHARS[R.char].name, W - 12, 26, 11, CHARS[R.char].aura, 'right', 4);
   txt(String(Math.ceil(timeLeft)), W / 2, 36, 24, timeLeft < 10 ? '#ff4d6d' : '#fff', 'center', 5);
   txt('PUNTOS ' + score, 12, 54, 9, '#7cf6ff', 'left', 3);
-  txt(STAGES[stageIdx].name, W - 12, 54, 8, '#ffd400', 'right', 3);
+  txt(curSt().name, W - 12, 54, 8, '#ffd400', 'right', 3);
   txt('ROBADAS ' + stolenTotal, 12, 71, 8, '#fff', 'left', 3);
   if (combo >= 3) txt('COMBO ' + combo, W - 12, 71, 8, '#7cff6b', 'right', 3);
   drawCloset(P, 10); drawCloset(R, W - 260);
@@ -658,7 +683,7 @@ function render() {
   if (state === 'title') { drawTitle(); g.restore(); return; }
   if (state === 'select') { drawSelect(); g.restore(); return; }
   if (state === 'name' || state === 'top') { drawBG('lima', 0.8, true); g.restore(); return; }
-  drawBG(STAGES[stageIdx].key, 0, false, STAGES[stageIdx].bgAnchor ?? 0.5);
+  drawBG(curSt().key, 0, false, curSt().bgAnchor ?? 0.5);
   drawFighter(P); drawFighter(R);
   fx.forEach(e => {
     if (e.t < 0) return;
@@ -732,7 +757,7 @@ function render() {
   });
   if (state === 'intro') {
     g.fillStyle = 'rgba(0,0,0,0.72)'; g.fillRect(0, SCENE_Y + 70, W, 170);
-    if (stateT < 1.6) { txt('ESCENARIO ' + (stageIdx + 1) + ' DE 4', W / 2, SCENE_Y + 110, 13, '#7cf6ff'); txt(STAGES[stageIdx].name, W / 2, SCENE_Y + 165, STAGES[stageIdx].name.length > 14 ? 19 : 34, '#ffd400', 'center', 8); txt(STAGES[stageIdx].sub, W / 2, SCENE_Y + 210, 11, '#fff'); }
+    if (stateT < 1.6) { txt((secret ? 'NIVEL SECRETO' : 'ESCENARIO ' + (stageIdx + 1) + ' DE 4'), W / 2, SCENE_Y + 110, 13, '#7cf6ff'); txt(curSt().name, W / 2, SCENE_Y + 165, curSt().name.length > 14 ? 19 : 34, '#ffd400', 'center', 8); txt(curSt().sub, W / 2, SCENE_Y + 210, 11, '#fff'); }
     else txt('¡A FARMEAR CRINGE!', W / 2, SCENE_Y + 170, 26, '#ff3fd2');
   }
   if (state === 'ko') {
@@ -805,16 +830,18 @@ function updateUI() {
   $('pad').style.display = state === 'fight' || state === 'intro' || state === 'ko' ? 'grid' : 'none';
   $('namebox').style.display = state === 'name' ? 'flex' : 'none';
   $('vipWrap').style.display = state === 'top' && vipEligible ? 'block' : 'none';
+  $('secretBtn').style.display = state === 'top' && vipUnlocked ? 'inline-block' : 'none';
   $('topbox').style.display = state === 'top' ? 'flex' : 'none';
   const menu = state === 'title' || state === 'select' || state === 'top' || state === 'name';
   $('mute').style.display = menu ? 'block' : 'none';
   $('toptitle').style.display = state === 'title' || state === 'select' ? 'block' : 'none';
   if (state === 'name') {
     $('finalscore').textContent = score.toLocaleString('es-PE');
-    $('finalmsg').textContent = (result && stageIdx === 3 ? '¡Sobreviviste a la Misa del Papa!' : 'Llegaste hasta: ' + STAGES[stageIdx].name) + ' · Prendas robadas: ' + stolenTotal;
+    $('finalmsg').textContent = (result && stageIdx === 3 ? '¡Sobreviviste a la Misa del Papa!' : 'Llegaste hasta: ' + curSt().name) + ' · Prendas robadas: ' + stolenTotal;
     $('nameerr').textContent = '';
   }
 }
+$('secretBtn').addEventListener('click', () => { startAudio(); startSecret(); });
 $('vipBtn').addEventListener('click', () => { if (vipUnlocked) return; $('vipBox').style.display = $('vipBox').style.display === 'none' ? 'block' : 'none'; $('vipCode').focus(); });
 $('vipBox').addEventListener('submit', e => { e.preventDefault(); if (normCode($('vipCode').value) === VIP_CODE) { vipUnlocked = true; $('vipBox').style.display = 'none'; $('vipBtn').textContent = '★ VIP · DESBLOQUEADO'; $('vipMsg').textContent = ''; } else { $('vipMsg').textContent = 'Código incorrecto'; } $('vipCode').value = ''; });
 const API = /keikotaptap|mantarraya/.test(location.hostname) ? 'https://farmeando-cringe.onrender.com' : '';
@@ -877,7 +904,7 @@ $('namebox').addEventListener('submit', submitName);
 $('skipName').addEventListener('click', () => { myEntry = null; setState('top'); loadTop(); if (musicOn && userStarted) { try { RANK_SND.currentTime = 0; RANK_SND.play().catch(() => { }); } catch (_) { } } setTimeout(() => { if (state === 'top') $('support').hidden = false; }, 1800); });
 $('again').addEventListener('click', () => { myEntry = null; setState('select'); playMusic('title'); });
 $('share').addEventListener('click', shareWA);
-$('mute').addEventListener('click', () => { musicOn = !musicOn; sfxMute = !musicOn; $('mute').textContent = musicOn ? '♪ ON' : '♪ OFF'; if (musicOn) { userStarted = true; const k = curMusic; curMusic = null; playMusic(k || 'title'); if (crowdAud && state === 'fight' && STAGES[stageIdx].key === 'misa') crowdAud.play().catch(() => { }); } else { Object.values(MUS).forEach(a => a.pause()); if (crowdAud) crowdAud.pause(); } });
+$('mute').addEventListener('click', () => { musicOn = !musicOn; sfxMute = !musicOn; $('mute').textContent = musicOn ? '♪ ON' : '♪ OFF'; if (musicOn) { userStarted = true; const k = curMusic; curMusic = null; playMusic(k || 'title'); if (crowdAud && state === 'fight' && curSt().key === 'misa') crowdAud.play().catch(() => { }); } else { Object.values(MUS).forEach(a => a.pause()); if (crowdAud) crowdAud.pause(); } });
 $('toptitle').addEventListener('click', () => { showTop(); });
 // Cierre: Yape y MNRY
 $('yapeBtn').addEventListener('click', () => { $('support').hidden = false; });
@@ -928,6 +955,7 @@ function loop(now) {
     loadImg('ui_win', 'assets/ui_win.png?v=1'),
     loadImg('logo', 'assets/logo_title.png?v=1'),
     ...STAGES.map(s => loadImg('bg_' + s.key, 'assets/bg_' + s.key + '.jpg')),
+    loadImg('bg_palacio', 'assets/bg_palacio.jpg?v=1'),
     document.fonts ? document.fonts.load('20px "Press Start 2P"') : null,
   ]);
   SEL.kunte = newFighter('kunte', 1, 1); SEL.espa = newFighter('espa', -1, 1);
